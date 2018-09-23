@@ -1,0 +1,24 @@
+<form name="prog">
+   <textarea name="text" rows=5 cols=40>
+       1+2*3+4*5
+   </textarea>
+</form>
+<button onclick="run()">Run</button>
+<script src="../lib/require.js"></script>
+<script>
+requirejs.config({
+    paths: {
+        "lib/assert": "../lib/assert",
+        "lang/CodeGen": "../lang/CodeGen",
+        "lang/Grammar": "../lang/Grammar",
+        "lang/ExpressionParser": "../lang/ExpressionParser",
+        "lang/Parser": "../lang/Parser",
+        "lang/Pos2RC": "../lang/Pos2RC",
+        "source-map":"../lang/source-map",
+        "lang/Visitor": "../lang/Visitor",
+    }
+});
+requirejs(["exprtest/myRunner"],function () {
+
+});
+</script>
