@@ -9,28 +9,29 @@ const vdef={
         }
     },
     classDef: function (node) {
+        const
+            fields=node.members.
+                filter((member)=>member.type==="fieldDecl"),
+            methods=node.members.
+                filter((member)=>member.type==="methodDef");
         this.printf("class %s {\n" ,node.name   );
-        this.printf("   constructor() {\n");
-        for (let member of node.members) {
-            // ここで  this.x=0;  のようなコードを出力
-            if (member.type=="fieldDecl") {
-                this.printf("      this.%s=0;\n", member.name);
-            }
-            // this.visit(decl)
+        this.printf("  constructor(%j) {\n", ["," ,fields.map((f)=>f.name)]);
+        for (const f of fields) {
+            this.printf("    this.%s=%s;\n", f.name, f.name);
         }
-        this.printf("   }\n");
-        for (let member of node.members) {
-            // ここで  main() { ... }  のようなコードを出力
-            if (member.type=="methodDef") {
-                this.printf("      %s() {\n", member.name);
-                this.printf("      }\n");
-            }
+        this.printf("  }\n");
+        for (const m of methods) {
+            this.printf("  %s () {\n",m.name);
+            this.printf("  }\n");
         }
         this.printf("}\n");
     },
     fieldDecl: function (node) {
         this.printf("      this.%s=0;\n", node.name);
-    }
+    },
+    symbol: function (node) {
+        this.printf("%s",node);
+    },
 
 };
 const Generator= {

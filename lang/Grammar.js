@@ -87,6 +87,7 @@ class Grammar {
                         tnames.push(k)
                     }
                     assert(tnames.length===1,"Invalid expr ",expr);
+                    assert(tnames[0]!=="type", "Cannot use the name 'type' as an attribute name", expr);
                     names.push(tnames[0]);
                     e=e[tnames[0]];
                 } else names.push(null);
