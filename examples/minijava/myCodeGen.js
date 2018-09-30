@@ -4,26 +4,34 @@ function (Visitor, CodeGen) {
 
 const vdef={
     program: function (node) {
-        this.printf("let hogeCount=0;%n");
-        this.printf("console.log('start');%n");
         for (const b of node.body) {
             this.visit(b);
         }
-        this.printf("console.log('end');%n");
     },
-    hogeStmt: function (node) {
-        this.printf("console.log('hoge',%s);%n" ,  node.value);
-    },
-    fugaStmt: function (node) {
-        const v1=parseFloat(node.value1);
-        const v2=parseFloat(node.value2);
-        this.printf("console.log('fuga',%s);%n" , v1+v2);
-    },
-    piyoStmt: function (node) {
-        for (var i=0; i<node.times; i++) {
-            this.printf("console.log('piyo');%n");
+    classDef: function (node) {
+        this.printf("class %s {\n" ,node.name   );
+        this.printf("   constructor() {\n");
+        for (let member of node.members) {
+            // ここで  this.x=0;  のようなコードを出力
+            if (member.type=="fieldDecl") {
+                this.printf("      this.%s=0;\n", member.name);
+            }
+            // this.visit(decl)
         }
+        this.printf("   }\n");
+        for (let member of node.members) {
+            // ここで  main() { ... }  のようなコードを出力
+            if (member.type=="methodDef") {
+                this.printf("      %s() {\n", member.name);
+                this.printf("      }\n");
+            }
+        }
+        this.printf("}\n");
+    },
+    fieldDecl: function (node) {
+        this.printf("      this.%s=0;\n", node.name);
     }
+
 };
 const Generator= {
     generate: function (node) {

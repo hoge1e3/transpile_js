@@ -6,6 +6,10 @@ window.run=()=>{
     if (!src.match(/\n$/)) src+="\n";
     localStorage.lastSrc=src;
     const tres=myGrammar.tokenizer.get("tokens").parseStr(src);
+    if (!tres.success) {
+        alert("Token error! at "+ tres.src.maxRow+":"+tres.src.maxCol);
+        return;
+    }
     const tokens=tres.result[0];
     console.log("tokenres",tokens.map(
         (e)=>e.type+" "+e.pos+" "+src.substring(e.pos,e.pos+e.len)

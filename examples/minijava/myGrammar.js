@@ -6,7 +6,7 @@ define(["lang/Grammar"], function (Grammar) {
     //トークンの定義
     const tdef={
         tokens: [{"this":tokenizer.rep0("token")}, /^\s*/ ,P.StringParser.eof],
-        token: tokenizer.or("class","symbol","int","double","{","}",";"),
+        token: tokenizer.or("class","int","double","symbol","(",")","{","}",";"),
         class: "'class",
         int: "'int",
         double: "'double",
@@ -15,6 +15,8 @@ define(["lang/Grammar"], function (Grammar) {
         number: /^[+-]?(([0-9]+\.[0-9]+)|(\.[0-9]+)|([0-9]+\.)|([0-9]+))/,
         "{": "'{",
         "}": "'}",
+        "(": "'(",
+        ")": "')",
         ";": "';",
     };
     tokenizer.def(tdef);
@@ -31,16 +33,14 @@ define(["lang/Grammar"], function (Grammar) {
     const tk=P.TokensParser.token;
     //構文の定義
     const gdef={
-        program: [{body:rep0("stmt")},P.TokensParser.eof],
-        stmt: or("hogeStmt","fugaStmt","piyoStmt"),
-        hogeStmt: ["hoge",{value:"number"},";"],
-        fugaStmt: ["fuga",{value1:"number"},{value2:"number"},";"],
-        piyoStmt: ["piyo",{times:"number"},";"],
-        number: tk("number"),
-        hoge: tk("hoge"),
-        fuga: tk("fuga"),
-        piyo: tk("piyo"),
-        ";": tk(";"),
+        program: [{body:rep0("classDef")},P.TokensParser.eof],
+        classDef: ["class", {name:"symbol"}, "{", {members: rep0("member")},  "}"],
+        member: or("fieldDecl", "methodDef"),
+        fieldDecl: [{typeName:"typeName"},{name:"symbol"},";"],
+        methodDef: [{typeName:"typeName"},{name:"symbol"},"(",")","{","}"],
+        typeName: or("int","double"),
+        ";": tk(";"),"class":tk("class"),"int":tk("int"),"double":tk("double"),
+        "{": tk("{"), "}":tk("}"),"(": tk("("), ")":tk(")"),symbol: tk("symbol")
     };
     g.def(gdef);
 

@@ -13,8 +13,10 @@ var $={
 	verboseFirst: false,traceFirstTbl:false},
 	Parser: Parser,
 	StringParser: StringParser,
-	nc: nc
+	nc: nc,
+	SEP: Symbol("separator"),
 };
+Parser.SEP=$.SEP;
 $.dispTbl=function (tbl) {
 	var buf="";
 	var h={};
@@ -319,31 +321,22 @@ extend(Parser.prototype, {// class Parser
 			}
 		}).setName("("+t.name+")?");
 	},
-	sep1: function(sep, valuesToArray) {
+	sep1: function(sep) {
 		var value=this;
-		if (valuesToArray==null) valuesToArray=true;
 		nc(value,"value");nc(sep,"sep");
 		var tail=sep.and(value).ret(function(r1, r2) {
-			if(valuesToArray) return r2;
-			return {sep:r1, value:r2};
+			if (typeof r2==="object" || typeof r2==="function") {
+				r2[$.SEP]=r1;
+			}
+			return r2;
 		});
 		return value.and(tail.rep0()).ret(function(r1, r2){
-			var i;
-			if (valuesToArray) {
-				var r=[r1];
-					for (i in r2) {
-						r.push(r2[i]);
-					}
-				return r;
-			} else {
-				return {head:r1,tails:r2};
-			}
+			return [r1].concat(r2);
 		}).setName("(sep1 "+value.name+"~~"+sep.name+")");
 	},
 	sep0: function(s){
-		return this.sep1(s,true).opt().ret(function (r) {
-			if (!r) return [];
-			return r;
+		return this.sep1(s).opt().ret(function (r) {
+			return r || [];
 		});
 	},
 	tap: function (msg) {

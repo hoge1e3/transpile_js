@@ -14,9 +14,9 @@ const vdef={
         this.printf("console.log('hoge',%s);%n" ,  node.value);
     },
     fugaStmt: function (node) {
-        const v1=parseFloat(node.value1);
-        const v2=parseFloat(node.value2);
-        this.printf("console.log('fuga',%s);%n" , v1+v2);
+        /*const v1=parseFloat(node.value1);
+        const v2=parseFloat(node.value2);*/
+        this.printf("console.log('fuga',%s);%n" , node.values.join("+"));
     },
     piyoStmt: function (node) {
         for (var i=0; i<node.times; i++) {

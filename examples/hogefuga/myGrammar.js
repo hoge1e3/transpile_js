@@ -5,12 +5,13 @@ define(["lang/Grammar"], function (Grammar) {
     //トークンの定義
     const tdef={
         tokens: [{"this":tokenizer.rep0("token")}, /^\s*/ ,P.StringParser.eof],
-        token: tokenizer.or("hoge","fuga","piyo","number",";"),
+        token: tokenizer.or("hoge","fuga","piyo","number",";",","),
         hoge: "'hoge",
         fuga: "'fuga",
         piyo: "'piyo",
         //number: /^[+-]?(([0-9]+\.[0-9]+)|([0-9]+))/,
         number: /^[+-]?(([0-9]+\.[0-9]+)|(\.[0-9]+)|([0-9]+\.)|([0-9]+))/,
+        ",": "',",
         ";": "';",
     };
     tokenizer.def(tdef);
@@ -30,13 +31,14 @@ define(["lang/Grammar"], function (Grammar) {
         program: [{body:rep0("stmt")},P.TokensParser.eof],
         stmt: or("hogeStmt","fugaStmt","piyoStmt"),
         hogeStmt: ["hoge",{value:"number"},";"],
-        fugaStmt: ["fuga",{value1:"number"},{value2:"number"},";"],
+        fugaStmt: ["fuga",{values:g.sep1("number",",")},";"],
         piyoStmt: ["piyo",{times:"number"},";"],
         number: tk("number"),
         hoge: tk("hoge"),
         fuga: tk("fuga"),
         piyo: tk("piyo"),
         ";": tk(";"),
+        ",": tk(","),
     };
     g.def(gdef);
 
