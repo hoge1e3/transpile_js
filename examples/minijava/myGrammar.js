@@ -6,18 +6,21 @@ define(["lang/Grammar"], function (Grammar) {
     //トークンの定義
     const tdef={
         tokens: [{"this":tokenizer.rep0("token")}, /^\s*/ ,P.StringParser.eof],
-        token: tokenizer.or("class","int","double","symbol","(",")","{","}",";"),
+        token: tokenizer.or("class","int","double","symbol","number","(",")","{","}","+","=","*",";"),
         class: "'class",
         int: "'int",
         double: "'double",
         symbol: /^[a-zA-Z_$][a-zA-Z_$0-9]*/,
         //number: /^[+-]?(([0-9]+\.[0-9]+)|([0-9]+))/,
-        number: /^[+-]?(([0-9]+\.[0-9]+)|(\.[0-9]+)|([0-9]+\.)|([0-9]+))/,
+        number: /^(([0-9]+\.[0-9]+)|(\.[0-9]+)|([0-9]+\.)|([0-9]+))/,
         "{": "'{",
         "}": "'}",
         "(": "'(",
         ")": "')",
         ";": "';",
+        "+": "'+",
+        "*": "'*",
+        "=": "'=",
     };
     tokenizer.def(tdef);
 
@@ -37,10 +40,24 @@ define(["lang/Grammar"], function (Grammar) {
         classDef: ["class", {name:"symbol"}, "{", {members: rep0("member")},  "}"],
         member: or("fieldDecl", "methodDef"),
         fieldDecl: [{typeName:"typeName"},{name:"symbol"},";"],
-        methodDef: [{typeName:"typeName"},{name:"symbol"},"(",")","{","}"],
+        methodDef: [{typeName:"typeName"},{name:"symbol"},"(",")","{",
+            rep0("exprStmt"), // 式文*
+        "}"],
         typeName: or("int","double"),
+        exprStmt: ["expr" , ";"],
+        expr:  g.expr({
+            element: or("number","symbol"),
+            operators: [
+                ["infixr", "="  ] , //  = 右結合２項演算子
+                ["infixl", "+"  ] , //  + 左結合２項演算子
+                ["infixl", "*"  ] , //  * 左結合２項演算子
+            ]
+        }),
+        "number": tk("number"),
         ";": tk(";"),"class":tk("class"),"int":tk("int"),"double":tk("double"),
-        "{": tk("{"), "}":tk("}"),"(": tk("("), ")":tk(")"),symbol: tk("symbol")
+        "{": tk("{"), "}":tk("}"),"(": tk("("), ")":tk(")"),
+        "=": tk("="),  "+": tk("+"),  "*": tk("*"),
+        symbol: tk("symbol")
     };
     g.def(gdef);
 

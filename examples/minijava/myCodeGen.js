@@ -15,7 +15,7 @@ const vdef={
             methods=node.members.
                 filter((member)=>member.type==="methodDef");
         this.printf("class %s {\n" ,node.name   );
-        this.printf("  constructor(%j) {\n", ["," ,fields.map((f)=>f.name)]);
+        this.printf("  constructor(%s) {\n", fields.map((f)=>f.name).join(",")  );
         for (const f of fields) {
             this.printf("    this.%s=%s;\n", f.name, f.name);
         }
