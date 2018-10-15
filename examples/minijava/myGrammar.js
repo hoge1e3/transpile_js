@@ -6,7 +6,11 @@ define(["lang/Grammar"], function (Grammar) {
     //トークンの定義
     const tdef={
         tokens: [{"this":tokenizer.rep0("token")}, /^\s*/ ,P.StringParser.eof],
-        token: tokenizer.or("class","int","double","symbol","number","(",")","{","}","+","=","*",";"),
+        token: tokenizer.or("if","while","class","int","double","symbol","number",
+        "<=",">=","!=","==",">","<",
+        "(",")","{","}","+","=","*",";",".",",","/"),
+        if: "'if",
+        while: "'while",
         class: "'class",
         int: "'int",
         double: "'double",
@@ -18,9 +22,18 @@ define(["lang/Grammar"], function (Grammar) {
         "(": "'(",
         ")": "')",
         ";": "';",
+        ",": "',",
+        "/": "'/",
         "+": "'+",
         "*": "'*",
         "=": "'=",
+        ".": "'.",
+        "<=":"'<=",
+        ">=":"'>=",
+        "!=":"'!=",
+        "==":"'==",
+        ">":"'>",
+        "<":"'<",
     };
     tokenizer.def(tdef);
 
@@ -41,22 +54,39 @@ define(["lang/Grammar"], function (Grammar) {
         member: or("fieldDecl", "methodDef"),
         fieldDecl: [{typeName:"typeName"},{name:"symbol"},";"],
         methodDef: [{typeName:"typeName"},{name:"symbol"},"(",")","{",
-            rep0("exprStmt"), // 式文*
+            {body:rep0("stmt")} , // 文*
         "}"],
         typeName: or("int","double"),
-        exprStmt: ["expr" , ";"],
+        stmt: or("exprStmt","ctrlStmt","block"),
+        ctrlStmt: or("ifStmt","whileStmt"),
+        ifStmt: ["if","(","expr",")","stmt"],
+        whileStmt: ["while","(","expr",")","stmt"],
+        block: ["{",  {body:rep0("stmt")}, "}"],
+        exprStmt: [{expr:"expr"} , ";"],
         expr:  g.expr({
             element: or("number","symbol"),
-            operators: [
+            operators: [// 優先順位(低い)
                 ["infixr", "="  ] , //  = 右結合２項演算子
-                ["infixl", "+"  ] , //  + 左結合２項演算子
-                ["infixl", "*"  ] , //  * 左結合２項演算子
+                ["infixl", or(">=","<=","==","!=",">","<")  ] , //  + -  左結合２項演算子
+                ["infixl", or("+","-")  ] , //  + -  左結合２項演算子
+                ["infixl", or("*","/")  ] , //  * 左結合２項演算子
+                ["postfix" , or("args" , "memberRef") ] , // (a,b)  .x
+                // 優先順位(高い)
             ]
         }),
+        "args": ["(", {args:g.sep0("expr", "," )}  , ")"],
+        "memberRef": ["." , {name:"symbol"} ],
         "number": tk("number"),
         ";": tk(";"),"class":tk("class"),"int":tk("int"),"double":tk("double"),
         "{": tk("{"), "}":tk("}"),"(": tk("("), ")":tk(")"),
-        "=": tk("="),  "+": tk("+"),  "*": tk("*"),
+        "=": tk("="),  "+": tk("+"), "-": tk("-"),  "*": tk("*"), "/":tk("/"), ",":tk(","),
+        ".": tk("."), "if":tk("if"),"while":tk("while"),
+        "==": tk("=="),
+        "!=": tk("!="),
+        ">=": tk(">="),
+        "<=": tk("<="),
+        ">": tk(">"),
+        "<": tk("<"),
         symbol: tk("symbol")
     };
     g.def(gdef);

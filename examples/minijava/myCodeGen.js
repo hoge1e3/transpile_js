@@ -14,20 +14,67 @@ const vdef={
                 filter((member)=>member.type==="fieldDecl"),
             methods=node.members.
                 filter((member)=>member.type==="methodDef");
-        this.printf("class %s {\n" ,node.name   );
-        this.printf("  constructor(%s) {\n", fields.map((f)=>f.name).join(",")  );
+        this.printf("class %s {%{" ,node.name   );
+        this.printf("constructor(%s) {%{", fields.map((f)=>f.name).join(",")  );
         for (const f of fields) {
-            this.printf("    this.%s=%s;\n", f.name, f.name);
+            this.printf("this.%s=%s;%n", f.name, f.name);
         }
-        this.printf("  }\n");
+        this.printf("%}}%n");
         for (const m of methods) {
-            this.printf("  %s () {\n",m.name);
-            this.printf("  }\n");
+            this.printf("%s () {%{",m.name);
+            for (const b of m.body) {
+                this.visit(b);
+            }
+            this.printf("%}}%n");
         }
-        this.printf("}\n");
+        this.printf("%}}%n");
     },
+    exprStmt: function (node) {
+        this.visit(node.expr);
+        this.printf(";%n");
+    },
+    infixr: function(node) {
+        // node.left node.op node.right
+        this.printf("(");
+        this.visit(node.left);
+        this.visit(node.op);
+        this.visit(node.right);
+        this.printf(")");
+    },
+    infixl: function(node) {
+        // node.left node.op node.right
+        this.printf("(");
+        this.visit(node.left);
+        this.visit(node.op);
+        this.visit(node.right);
+        this.printf(")");
+    },
+    postfix: function (node) {
+        this.printf("%v%v",node.left,node.op);
+    },
+    prefix: function (node) {
+        this.printf("%v%v",node.op,node.right);
+    },
+    args: function (node) {
+        this.printf("(%j)",[",",node.args]);
+    },
+    memberRef: function (node) {
+        this.printf(".%s",node.name);
+    },
+    "number": function (node) { this.printf("%s",node);},
+    "=": function (node) { this.printf("%s",node);},
+    "+": function (node) { this.printf("%s",node);},
+    "-": function (node) { this.printf("%s",node);},
+    "*": function (node) { this.printf("%s",node);},
+    "/": function (node) { this.printf("%s",node);},
+    "==": function (node) { this.printf("%s",node);},
+    "!=": function (node) { this.printf("%s",node);},
+    ">=": function (node) { this.printf("%s",node);},
+    "<=": function (node) { this.printf("%s",node);},
+    "<": function (node) { this.printf("%s",node);},
+    ">": function (node) { this.printf("%s",node);},
     fieldDecl: function (node) {
-        this.printf("      this.%s=0;\n", node.name);
+        this.printf("this.%s=0;%n", node.name);
     },
     symbol: function (node) {
         this.printf("%s",node);
@@ -38,7 +85,8 @@ const Generator= {
     generate: function (node) {
         const v=Visitor(vdef);
         v.def=function (node) {
-            this.printf("/*UNDEFINED: %s*/",node.type);
+            if (node==null) this.printf("NULL");
+            else this.printf("/*UNDEFINED: '%s'*/",node.type);
             console.log(node.type, node);
         };
         const c=CodeGen({
