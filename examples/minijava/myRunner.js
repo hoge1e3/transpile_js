@@ -1,6 +1,6 @@
 // MINIJAVA
-requirejs(["minijava/myGrammar","minijava/myCodeGen"],
-function (myGrammar, myCodeGen) {
+requirejs(["minijava/myGrammar","minijava/myCodeGen","minijava/mySemantics"],
+function (myGrammar, myCodeGen, mySemantics) {
 window.run=()=>{
     let src=document.forms.prog.text.value;
     if (!src.match(/\n$/)) src+="\n";
@@ -24,6 +24,7 @@ window.run=()=>{
     } else {
         console.log(r);
         const node=r.result[0];
+        mySemantics.check(node);
         const gensrc=myCodeGen.generate(node);
         console.log(gensrc);
         eval(gensrc);
