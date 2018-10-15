@@ -25,13 +25,39 @@ const vdef={
             for (const b of m.body) {
                 this.visit(b);
             }
-            this.printf("%}}%n");
+            this.printf("%n%}}%n");
         }
         this.printf("%}}%n");
     },
     exprStmt: function (node) {
         this.visit(node.expr);
         this.printf(";%n");
+    },
+    block: function (node) {
+        this.printf("{%{");
+        for (const b of node.body) {
+            this.visit(b);
+        }
+        this.printf("%n%}}");
+    },
+    ifStmt: function (node) {
+        if (node.elsePart) {
+            this.printf("if (%v) %v else %v",
+            node.cond,node.then, node.elsePart.else);
+            /*
+            this.printf("if (");
+            this.visit(node.cond);
+            this.printf(")");
+            this.visit(node.then);
+            this.printf(" else ");
+            this.visit(node.elsePart.else);
+            */
+        } else {
+            this.printf("if (%v) %v",node.cond,node.then);
+        }
+    },
+    whileStmt: function (node) {
+        this.printf("while (%v) %v",node.cond,node.do);
     },
     infixr: function(node) {
         // node.left node.op node.right
@@ -77,7 +103,7 @@ const vdef={
         this.printf("this.%s=0;%n", node.name);
     },
     symbol: function (node) {
-        this.printf("%s",node);
+        this.printf("this.%s",node);
     },
 
 };
