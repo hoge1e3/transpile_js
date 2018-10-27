@@ -103,7 +103,11 @@ const vdef={
         this.printf("this.%s=0;%n", node.name);
     },
     symbol: function (node) {
-        this.printf("this.%s",node);
+        if (node.isParam) {
+            this.printf("%s",node);
+        } else {
+            this.printf("this.%s",node);
+        }
     },
 
 };

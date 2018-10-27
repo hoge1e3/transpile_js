@@ -8,10 +8,39 @@ class Field {
         this.name=name;
     }
 }
+class Method {
+    constructor(returnType, name) {
+        this.returnType=returnType;
+        this.name=name;
+        this.params=[];
+        this.locals={};//1022宿題
+    }
+    // nameで指定された名前のパラメータがあれば返す．なければundefinedを返す
+    getParam(name) {
+        for (const p of this.params) {
+            if (p.name===name) return p;
+        }
+        //return undefined;
+    }
+    getLocal(name) {/*1022宿題*/}
+}
+class Param {
+    constructor(type, name) {
+        this.type=type;
+        this.name=name;
+    }
+}
+class Local {// 1022宿題:Paramと同じ
+    constructor(type, name) {
+        this.type=type;
+        this.name=name;
+    }
+}
 class Class {
     constructor(name) {
         this.name=name;
         this.fields={ };// {name: Field}
+        this.methods={ };// {name: Method}
     }
     getField(name) {
         return this.fields[name];
@@ -19,8 +48,15 @@ class Class {
     addField(field) {
         this.fields[field.name]=field;
     }
+    getMethod(name) {
+        return this.methods[name];
+    }
+    addMethod(method) {
+        this.methods[method.name]=method;
+    }
 }
 let curClass; // 今解析中のクラスオブジェクト
+let curMethod; // 今解析中のメソッドオブジェクト
 const vdef={
     program: function (node) {
         for (const b of node.body) {
@@ -35,6 +71,16 @@ const vdef={
         filter((member)=>member.type==="methodDef");
         curClass = new Class( node.name );
         console.log("classDef",node);
+        for (const m of methods) {
+            let mm=new Method(m.typeName,m.name.text);
+            curClass.addMethod(mm);
+            // パラメータごとに繰り返し
+            for (const p of m.params) {
+                mm.params.push( new Param( p.typeName  , p.name.text ));
+            }
+            // デバッグ用
+            console.log("method params", mm.params);
+        }
         for (const f of fields) {
             this.visit(f);
         }
@@ -44,10 +90,15 @@ const vdef={
         console.log("curClass", curClass);
     },
     methodDef: function (node) {
-        console.log("methodDef",node);
+        curMethod = curClass.getMethod(node.name.text);
+        console.log("methodDef",node,curMethod);
+        // curClass.addMethod()
         for (const b of node.body) {
             this.visit(b);
         }
+    },
+    localDecl: function (node) {
+        // 1022宿題: 現在のメソッドにローカル変数を追加
     },
     exprStmt: function (node) {
         this.visit(node.expr);
@@ -90,16 +141,16 @@ const vdef={
         console.log("symbol",node, node.text);
         // 存在しないフィールドにアクセスしようとしたら
         // エラー（例外）を投げる
-        // JS でのエラーの投げ方：
         const f=curClass.getField(node.text);
-        // f =  undefined (ない場合)
-        // OK  f === undefined
-        // NG  f !== null   !(f === null)
-        // OK  f !=  null    !(f == null)
-        if (!f) {
+        const m=curClass.getMethod(node.text);
+        const p=curMethod.getParam(node.text);
+        // 1022宿題： ローカル変数の存在もチェックする
+        if (!f && !m && !p)  {
             throw new Error(node.text+" is not defined");
         }
-
+        if (p) {//  p==null やundefined以外
+            node.isParam=true;
+        }
     },
 
 };
