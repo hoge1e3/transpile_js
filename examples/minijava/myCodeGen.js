@@ -21,7 +21,8 @@ const vdef={
         }
         this.printf("%}}%n");
         for (const m of methods) {
-            this.printf("%s () {%{",m.name);
+            const p=m.params.map((p)=>p.name.text).join(",");
+            this.printf("%s (%s) {%{",m.name, p);
             for (const b of m.body) {
                 this.visit(b);
             }
@@ -102,8 +103,11 @@ const vdef={
     fieldDecl: function (node) {
         this.printf("this.%s=0;%n", node.name);
     },
+    localDecl: function (node) {
+        this.printf("let %s;%n",node.name);
+    },
     symbol: function (node) {
-        if (node.isParam) {
+        if (node.isParam || node.isLocal) {
             this.printf("%s",node);
         } else {
             this.printf("this.%s",node);

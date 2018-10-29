@@ -2,15 +2,21 @@
 define (["lang/Visitor"],
 function (Visitor) {
 
+let types={};  // 型の名前  → 実際の型(Class)オブジェクト
+function nameToType(typeName) {
+    return types[typeName];
+}
 class Field {
     constructor(type, name) {
-        this.type=type;
+        console.log("Field name=",name,"type=",type);
+        this.type=nameToType(type);
         this.name=name;
     }
 }
 class Method {
     constructor(returnType, name) {
-        this.returnType=returnType;
+        console.log("Method name=",name,"returnType=",returnType);
+        this.returnType=nameToType(returnType);
         this.name=name;
         this.params=[];
         this.locals={};//1022宿題
@@ -22,17 +28,19 @@ class Method {
         }
         //return undefined;
     }
-    getLocal(name) {/*1022宿題*/}
+    getLocal(name) {return this.locals[name];}
 }
 class Param {
     constructor(type, name) {
-        this.type=type;
+        console.log("Param name=",name,"type=",type);
+        this.type=nameToType(type);
         this.name=name;
     }
 }
 class Local {// 1022宿題:Paramと同じ
     constructor(type, name) {
-        this.type=type;
+        console.log("Local name=",name,"type=",type);
+        this.type=nameToType(type);
         this.name=name;
     }
 }
@@ -70,6 +78,7 @@ const vdef={
             methods=node.members.
         filter((member)=>member.type==="methodDef");
         curClass = new Class( node.name );
+        types[node.name] = curClass;
         console.log("classDef",node);
         for (const m of methods) {
             let mm=new Method(m.typeName,m.name.text);
@@ -99,6 +108,7 @@ const vdef={
     },
     localDecl: function (node) {
         // 1022宿題: 現在のメソッドにローカル変数を追加
+        curMethod.locals[node.name]=new Local(node.typeName, node.name.text);
     },
     exprStmt: function (node) {
         this.visit(node.expr);
@@ -138,18 +148,24 @@ const vdef={
         curClass.addField(field);
     },
     symbol: function (node) {
-        console.log("symbol",node, node.text);
+        //console.log("symbol",node, node.text);
         // 存在しないフィールドにアクセスしようとしたら
         // エラー（例外）を投げる
         const f=curClass.getField(node.text);
         const m=curClass.getMethod(node.text);
         const p=curMethod.getParam(node.text);
+        const l=curMethod.getLocal(node.text);
         // 1022宿題： ローカル変数の存在もチェックする
-        if (!f && !m && !p)  {
+        if (!f && !m && !p && !l)  {
             throw new Error(node.text+" is not defined");
         }
         if (p) {//  p==null やundefined以外
             node.isParam=true;
+        }
+        if (l) {
+            console.log("symbol name=", node.text," type=",l.type);
+            node.isLocal=true;
+            node.exprType=l.type; 
         }
     },
 

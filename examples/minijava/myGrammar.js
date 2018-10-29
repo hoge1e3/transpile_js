@@ -1,4 +1,4 @@
-// MINIJAVA
+﻿// MINIJAVA
 define(["lang/Grammar"], function (Grammar) {
     const spc=/^\s*/;
     const tokenizer=new Grammar({space:spc});
@@ -62,7 +62,7 @@ define(["lang/Grammar"], function (Grammar) {
         "}"],
         params: sep0("param", ","),
         param: [{typeName:"typeName"},{name:"symbol"}],
-        typeName: or("int","double"),
+        typeName: or("int","double","symbol"),
         stmt: or("exprStmt","localDecl","ctrlStmt","block"),
         ctrlStmt: or("ifStmt","whileStmt"),
         ifStmt: ["if","(",{cond:"expr"},")",{then:"stmt"},

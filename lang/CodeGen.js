@@ -218,8 +218,9 @@ const IndentBuffer=function (options) {
 	$.dedent = function () {
 		var len=$.indentStr.length;
 		if (!$.buf.substring($.buf.length-len).match(/^\s*$/)) {
-			console.log($.buf);
-			throw new Error ("Non-space truncated ");
+			$.ln();
+			//console.log($.buf);
+			//throw new Error ("Non-space truncated ");
 		}
 		$.buf=$.buf.substring(0,$.buf.length-len);
 		$.indentBuf=$.indentBuf.substring(0 , $.indentBuf.length-len);

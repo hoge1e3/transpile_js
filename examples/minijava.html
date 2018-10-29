@@ -1,20 +1,23 @@
 <form name="prog">
    <textarea name="text" rows=15 cols=40>
-class Main {
-    int x;
-    double y;
-    int print(){}
-    int main(int a, int b ) {
-      a=5;
-      x=2+3*5;
-      x=2<=5;
-      x=print(3);
-      x=y.print(5);
-      if (x<=y) {
-       y.print(x);
-      }
-    }
-}
+       class Sub {
+           int output() {  }
+       }
+       class Main {
+           int x;
+           double y;
+           int print(){}
+           int main(int a, int b ) {
+             Sub s;
+             a=5;
+             x=a+y;
+             int i;
+             i=2+3*5;
+             x=2<=i;
+             x=print(3);
+             x=s.output();
+           }
+       }
 
    </textarea>
 </form>
