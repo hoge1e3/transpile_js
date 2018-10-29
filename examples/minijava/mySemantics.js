@@ -2,21 +2,17 @@
 define (["lang/Visitor"],
 function (Visitor) {
 
-let types={};  // 型の名前  → 実際の型(Class)オブジェクト
-function nameToType(typeName) {
-    return types[typeName];
-}
 class Field {
     constructor(type, name) {
         console.log("Field name=",name,"type=",type);
-        this.type=nameToType(type);
+        this.type=nameToType(type);//1029変更
         this.name=name;
     }
 }
 class Method {
     constructor(returnType, name) {
         console.log("Method name=",name,"returnType=",returnType);
-        this.returnType=nameToType(returnType);
+        this.returnType=nameToType(returnType);//1029変更
         this.name=name;
         this.params=[];
         this.locals={};//1022宿題
@@ -33,14 +29,14 @@ class Method {
 class Param {
     constructor(type, name) {
         console.log("Param name=",name,"type=",type);
-        this.type=nameToType(type);
+        this.type=nameToType(type);//1029変更
         this.name=name;
     }
 }
 class Local {// 1022宿題:Paramと同じ
     constructor(type, name) {
         console.log("Local name=",name,"type=",type);
-        this.type=nameToType(type);
+        this.type=nameToType(type);//1029変更
         this.name=name;
     }
 }
@@ -65,6 +61,16 @@ class Class {
 }
 let curClass; // 今解析中のクラスオブジェクト
 let curMethod; // 今解析中のメソッドオブジェクト
+//1029追加
+let types={
+    int: new Class("int"),
+    double: new Class("double"),
+};  // 型の名前  → 実際の型(Class)オブジェクト
+function nameToType(typeName) {//名前からClassオブジェクトを取得
+    return types[typeName];
+}
+//----
+
 const vdef={
     program: function (node) {
         for (const b of node.body) {
@@ -78,7 +84,7 @@ const vdef={
             methods=node.members.
         filter((member)=>member.type==="methodDef");
         curClass = new Class( node.name );
-        types[node.name] = curClass;
+        types[node.name] = curClass;//1029追加
         console.log("classDef",node);
         for (const m of methods) {
             let mm=new Method(m.typeName,m.name.text);
@@ -126,6 +132,26 @@ const vdef={
     postfix: function (node) {
         // node.left node.op
         this.visit(node.left);
+        // 1029追加
+        if (node.op.type==="memberRef") {
+            // node が a.b のようなノードだったら
+            // node.left == a
+            // node.op.name == b
+            // a の型は node.left.exprType
+            var leftType=node.left.exprType;
+            var m=leftType.getMethod(node.op.name);
+            var f=leftType.getField(node.op.name);
+            if (!m && !f) {
+                throw new Error("Method or Field "+node.op.name+
+                " not found in type "+leftType.name);
+            }
+            if (f) {
+                node.exprType=f.type;
+            } else if (m) {
+                //TODO
+            }
+        }
+        //----
     },
     prefix: function (node) {
         // node.op node.right
@@ -165,7 +191,7 @@ const vdef={
         if (l) {
             console.log("symbol name=", node.text," type=",l.type);
             node.isLocal=true;
-            node.exprType=l.type; 
+            node.exprType=l.type; //1029追加
         }
     },
 
