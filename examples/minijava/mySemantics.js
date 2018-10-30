@@ -139,13 +139,15 @@ const vdef={
             // node.op.name == b
             // a の型は node.left.exprType
             var leftType=node.left.exprType;
+            // leftType(aの型)にnode.op.name(b)という名前のメソッドかフィールドがあるかどうかチェック
             var m=leftType.getMethod(node.op.name);
             var f=leftType.getField(node.op.name);
-            if (!m && !f) {
+            if (!m && !f) {//なければエラー
                 throw new Error("Method or Field "+node.op.name+
                 " not found in type "+leftType.name);
             }
-            if (f) {
+            if (f) {//フィールドとして見つかった場合
+                // a.b 自身の型は f.type
                 node.exprType=f.type;
             } else if (m) {
                 //TODO
