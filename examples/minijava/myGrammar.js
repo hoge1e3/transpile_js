@@ -7,7 +7,7 @@ define(["lang/Grammar"], function (Grammar) {
     const tdef={
         tokens: [{"this":tokenizer.rep0("token")}, /^\s*/ ,P.StringParser.eof],
         token: tokenizer.or("if","while","class","else","int","double","symbol","number",
-        "<=",">=","!=","==",">","<",
+        "<=",">=","!=","==",">","<","!",
         "(",")","{","}","+","-","=","*",";",".",",","/"),
         if: "'if",
         else: "'else",
@@ -27,6 +27,7 @@ define(["lang/Grammar"], function (Grammar) {
         "/": "'/",
         "+": "'+",
         "-": "'-",
+        "!": "'!",
         "*": "'*",
         "=": "'=",
         ".": "'.",
@@ -78,6 +79,7 @@ define(["lang/Grammar"], function (Grammar) {
                 ["infixl", or(">=","<=","==","!=",">","<")  ] , //  + -  左結合２項演算子
                 ["infixl", or("+","-")  ] , //  + -  左結合２項演算子
                 ["infixl", or("*","/")  ] , //  * 左結合２項演算子
+                ["prefix",or("!","-")],
                 ["postfix" , or("args" , "memberRef") ] , // (a,b)  .x
                 // 優先順位(高い)
             ]
@@ -91,6 +93,7 @@ define(["lang/Grammar"], function (Grammar) {
         ".": tk("."), "if":tk("if"),"while":tk("while"),"else":tk("else"),
         "==": tk("=="),
         "!=": tk("!="),
+        "!": tk("!"),
         ">=": tk(">="),
         "<=": tk("<="),
         ">": tk(">"),
