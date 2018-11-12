@@ -189,11 +189,18 @@ const vdef={
         }
         if (p) {//  p==null やundefined以外
             node.isParam=true;
+            node.exprType=p.type; //1029追加
         }
         if (l) {
             console.log("symbol name=", node.text," type=",l.type);
             node.isLocal=true;
             node.exprType=l.type; //1029追加
+        }
+        if (f) {
+            node.exprType=f.type; //1029追加
+        }
+        if (m) {
+            node.exprType=m.type; //1029追加
         }
     },
 
