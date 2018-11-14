@@ -1,24 +1,22 @@
 <form name="prog">
    <textarea name="text" rows=15 cols=40>
-       class Sub {
-           int output() {  }
-       }
-       class Main {
-           int x;
-           double y;
-           int print(){}
-           int main(int a, int b ) {
-             Sub s;
-             a=5;
-             x=a+y;
-             int i;
-             i=2+3*5;
-             x=2<=i;
-             x=print(3);
-             x=s.output();
-           }
-       }
-
+class Sub1 {
+  int p;
+  int add() {
+     p=p+1;
+  }
+}
+class Sub2 {
+  Sub1 s1;
+}
+class Main {
+  Sub2 s2;
+  int main() {
+     s2=new Sub1(new Sub1(10));
+     s2.s1.add();
+     window.console.log(s2.s1.p);
+  }
+}
    </textarea>
 </form>
 <button onclick="run()">Run</button>

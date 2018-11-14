@@ -28,7 +28,7 @@ window.run=()=>{
         mySemantics.check(node);
         const gensrc=myCodeGen.generate(node);
         console.log(gensrc);
-        eval(gensrc+"\nvar m=new Main(3,5);\nm.main();");
+        eval(gensrc+"\nvar m=new Main();\nm.main();");
     }
 };
 

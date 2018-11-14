@@ -121,13 +121,25 @@ const vdef={
     },
     infixr: function(node) {
         // node.left node.op node.right
+        console.log("infixr",node);
         this.visit(node.left);
         this.visit(node.right);
+        if (node.op.text==="=") {//1112
+            if (node.left.exprType!==node.right.exprType) {
+                console.log("= type not match",node.left.exprType, node.right.exprType);
+                throw new Error("=: type not match "+node.op.row+":"+node.op.col);
+            }
+        }
     },
     infixl: function(node) {
         // node.left node.op node.right
         this.visit(node.left);
         this.visit(node.right);
+        if (node.op.text==="+") {//1112
+            if (node.left.exprType===types.int) {
+                node.exprType=types.int;
+            }
+        }
     },
     postfix: function (node) {
         // node.left node.op
@@ -139,6 +151,7 @@ const vdef={
             // node.op.name == b
             // a の型は node.left.exprType
             var leftType=node.left.exprType;
+            if (!leftType) return;//1112 <- window は型がないので飛ばす
             // leftType(aの型)にnode.op.name(b)という名前のメソッドかフィールドがあるかどうかチェック
             var m=leftType.getMethod(node.op.name);
             var f=leftType.getField(node.op.name);
@@ -157,7 +170,18 @@ const vdef={
     },
     prefix: function (node) {
         // node.op node.right
-        this.visit(node.right);
+        console.log("prefix", node);
+        if (node.op.type==="new") {//1112
+            //  new XXXX();
+            console.log("new type=",node.right.left.text);
+            node.exprType=nameToType(node.right.left.text);
+            if (!node.exprType) {
+                throw new Error("Type "+node.right.left.text+" not found "+
+                node.op.row+":"+node.op.col);
+            }
+        } else {
+            this.visit(node.right);
+        }
     },
     args: function (node) {
         // node.arg
@@ -184,6 +208,9 @@ const vdef={
         const p=curMethod.getParam(node.text);
         const l=curMethod.getLocal(node.text);
         // 1022宿題： ローカル変数の存在もチェックする
+        if (node.text==="window") {//1112
+            return;
+        }
         if (!f && !m && !p && !l)  {
             throw new Error(node.text+" is not defined");
         }
@@ -199,9 +226,9 @@ const vdef={
         if (f) {
             node.exprType=f.type; //1029追加
         }
-        if (m) {
+        /*if (m) {
             node.exprType=m.type; //1029追加
-        }
+        }*/
     },
 
 };

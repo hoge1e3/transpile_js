@@ -6,7 +6,7 @@ define(["lang/Grammar"], function (Grammar) {
     //トークンの定義
     const tdef={
         tokens: [{"this":tokenizer.rep0("token")}, /^\s*/ ,P.StringParser.eof],
-        token: tokenizer.or("if","while","class","else","int","double","symbol","number",
+        token: tokenizer.or("new"/*1112*/,"if","while","class","else","int","double","symbol","number",
         "<=",">=","!=","==",">","<","!",
         "(",")","{","}","+","-","=","*",";",".",",","/"),
         if: "'if",
@@ -15,6 +15,7 @@ define(["lang/Grammar"], function (Grammar) {
         class: "'class",
         int: "'int",
         double: "'double",
+        new: "'new",//1112
         symbol: /^[a-zA-Z_$][a-zA-Z_$0-9]*/,
         //number: /^[+-]?(([0-9]+\.[0-9]+)|([0-9]+))/,
         number: /^(([0-9]+\.[0-9]+)|(\.[0-9]+)|([0-9]+\.)|([0-9]+))/,
@@ -79,11 +80,13 @@ define(["lang/Grammar"], function (Grammar) {
                 ["infixl", or(">=","<=","==","!=",">","<")  ] , //  + -  左結合２項演算子
                 ["infixl", or("+","-")  ] , //  + -  左結合２項演算子
                 ["infixl", or("*","/")  ] , //  * 左結合２項演算子
+                ["prefix","new"],//1112
                 ["prefix",or("!","-")],
                 ["postfix" , or("args" , "memberRef") ] , // (a,b)  .x
                 // 優先順位(高い)
             ]
         }),
+        "new": tk("new"),//1112
         "args": ["(", {args:g.sep0("expr", "," )}  , ")"],
         "memberRef": ["." , {name:"symbol"} ],
         "number": tk("number"),

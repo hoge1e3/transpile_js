@@ -80,7 +80,15 @@ const vdef={
         this.printf("%v%v",node.left,node.op);
     },
     prefix: function (node) {
-        this.printf("%v%v",node.op,node.right);
+        if (node.op.type==="new") {//1112
+            //  new XXXX();
+            var classname= node.right.left.text;
+            this.printf("new %s%v",classname, node.right.op);
+        } else {
+            this.printf("%v%v",node.op,node.right);
+            // this.visit(node.op);
+            // this.visit(node.right);
+        }
     },
     args: function (node) {
         this.printf("(%j)",[",",node.args]);
@@ -107,7 +115,7 @@ const vdef={
         this.printf("let %s;%n",node.name);
     },
     symbol: function (node) {
-        if (node.isParam || node.isLocal) {
+        if (node.isParam || node.isLocal || node.text==="window") {//1112
             this.printf("%s",node);
         } else {
             this.printf("this.%s",node);
