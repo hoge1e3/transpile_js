@@ -6,9 +6,10 @@ define(["lang/Grammar"], function (Grammar) {
     //トークンの定義
     const tdef={
         tokens: [{"this":tokenizer.rep0("token")}, /^\s*/ ,P.StringParser.eof],
-        token: tokenizer.or("new"/*1112*/,"if","while","class","else","int","double","symbol","number",
+        token: tokenizer.or("new"/*1112*/,"if","while","return","class","else","int","double","symbol","number",
+        "<<",">>>",">>",
         "<=",">=","!=","==",">","<","!",
-        "(",")","{","}","+","-","=","*",";",".",",","/"),
+        "(",")","{","}","+","-","=","*",";",".",",","/","&","^","|"),
         if: "'if",
         else: "'else",
         while: "'while",
@@ -16,6 +17,7 @@ define(["lang/Grammar"], function (Grammar) {
         int: "'int",
         double: "'double",
         new: "'new",//1112
+        return: "'return",
         symbol: /^[a-zA-Z_$][a-zA-Z_$0-9]*/,
         //number: /^[+-]?(([0-9]+\.[0-9]+)|([0-9]+))/,
         number: /^(([0-9]+\.[0-9]+)|(\.[0-9]+)|([0-9]+\.)|([0-9]+))/,
@@ -38,6 +40,12 @@ define(["lang/Grammar"], function (Grammar) {
         "==":"'==",
         ">":"'>",
         "<":"'<",
+        "<<":"'<<",
+        ">>":"'>>",
+        ">>>":"'>>>",
+        "&":"'&",
+        "|":"'|",
+        "^":"'^",
     };
     tokenizer.def(tdef);
 
@@ -65,7 +73,7 @@ define(["lang/Grammar"], function (Grammar) {
         params: sep0("param", ","),
         param: [{typeName:"typeName"},{name:"symbol"}],
         typeName: or("int","double","symbol"),
-        stmt: or("exprStmt","localDecl","ctrlStmt","block"),
+        stmt: or("exprStmt","localDecl","ctrlStmt","block","returnStmt"),
         ctrlStmt: or("ifStmt","whileStmt"),
         ifStmt: ["if","(",{cond:"expr"},")",{then:"stmt"},
             {elsePart:opt("elsePart")}],
@@ -73,11 +81,16 @@ define(["lang/Grammar"], function (Grammar) {
         whileStmt: ["while","(",{cond:"expr"},")",{do:"stmt"}],
         block: ["{",  {body:rep0("stmt")}, "}"],
         exprStmt: [{expr:"expr"} , ";"],
+        returnStmt: ["return",{expr:"expr"} , ";"],
         expr:  g.expr({
             element: or("number","symbol"),
             operators: [// 優先順位(低い)
                 ["infixr", "="  ] , //  = 右結合２項演算子
                 ["infixl", or(">=","<=","==","!=",">","<")  ] , //  + -  左結合２項演算子
+                ["infixl", or("|")  ] ,
+                ["infixl", or("^")  ] ,
+                ["infixl", or("&")  ] ,
+                ["infixl", or("<<",">>",">>>")  ] ,
                 ["infixl", or("+","-")  ] , //  + -  左結合２項演算子
                 ["infixl", or("*","/")  ] , //  * 左結合２項演算子
                 ["prefix","new"],//1112
@@ -91,6 +104,7 @@ define(["lang/Grammar"], function (Grammar) {
         "memberRef": ["." , {name:"symbol"} ],
         "number": tk("number"),
         ";": tk(";"),"class":tk("class"),"int":tk("int"),"double":tk("double"),
+        "return": tk("return"),
         "{": tk("{"), "}":tk("}"),"(": tk("("), ")":tk(")"),
         "=": tk("="),  "+": tk("+"), "-": tk("-"),  "*": tk("*"), "/":tk("/"), ",":tk(","),
         ".": tk("."), "if":tk("if"),"while":tk("while"),"else":tk("else"),
@@ -101,6 +115,12 @@ define(["lang/Grammar"], function (Grammar) {
         "<=": tk("<="),
         ">": tk(">"),
         "<": tk("<"),
+        ">>": tk(">>"),
+        "<<": tk("<<"),
+        ">>>": tk(">>>"),
+        "^": tk("^"),
+        "&": tk("&"),
+        "|": tk("|"),
         symbol: tk("symbol")
     };
     g.def(gdef);

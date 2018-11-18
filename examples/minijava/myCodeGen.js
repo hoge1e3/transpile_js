@@ -34,6 +34,9 @@ const vdef={
         this.visit(node.expr);
         this.printf(";%n");
     },
+    returnStmt: function (node) {
+        this.printf("return %v;%n",node.expr);
+    },
     block: function (node) {
         this.printf("{%{");
         for (const b of node.body) {
@@ -108,6 +111,12 @@ const vdef={
     "<=": function (node) { this.printf("%s",node);},
     "<": function (node) { this.printf("%s",node);},
     ">": function (node) { this.printf("%s",node);},
+    ">>": function (node) { this.printf("%s",node);},
+    "<<": function (node) { this.printf("%s",node);},
+    ">>>": function (node) { this.printf("%s",node);},
+    "|": function (node) { this.printf("%s",node);},
+    "^": function (node) { this.printf("%s",node);},
+    "&": function (node) { this.printf("%s",node);},
     fieldDecl: function (node) {
         this.printf("this.%s=0;%n", node.name);
     },

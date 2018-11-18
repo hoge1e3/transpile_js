@@ -124,21 +124,46 @@ const vdef={
         console.log("infixr",node);
         this.visit(node.left);
         this.visit(node.right);
-        if (node.op.text==="=") {//1112
-            if (node.left.exprType!==node.right.exprType) {
-                console.log("= type not match",node.left.exprType, node.right.exprType);
-                throw new Error("=: type not match "+node.op.row+":"+node.op.col);
+        var lt=node.left.exprType,rt=node.right.exprType;
+        switch (node.op.text) {
+        case "=":
+            if (lt===types.double && rt === types.int) {
+                node.exprType=types.double;
+            } else if (lt===rt) {
+                node.exprType=lt;
+            } else {
+                throw new Error("Cannot use "+node.op.text+" in this type "+node.op.row+":"+node.op.col);
             }
+            break;
         }
     },
     infixl: function(node) {
         // node.left node.op node.right
         this.visit(node.left);
         this.visit(node.right);
-        if (node.op.text==="+") {//1112
-            if (node.left.exprType===types.int) {
+        var lt=node.left.exprType,rt=node.right.exprType;
+        switch (node.op.text) {
+        case "+":case "-":case "*":case "/":case "%":
+            if (lt===types.int && rt===types.int) {
                 node.exprType=types.int;
+            }else if (lt===types.double && rt===types.double) {
+                node.exprType=types.double;
+            }else if (lt===types.int && rt===types.double) {
+                node.exprType=types.double;
+            }else if (lt===types.double && rt===types.int) {
+                node.exprType=types.double;
+            }else {
+                throw new Error("Cannot use "+node.op.text+" in this type "+node.op.row+":"+node.op.col);
             }
+            break;
+        case "^":case "&":case "|":case "<<":case ">>":case ">>>":
+            if (lt===types.int && rt===types.int) {
+                node.exprType=types.int;
+            }else {
+                throw new Error("Cannot use "+node.op.text+" in this type "+node.op.row+":"+node.op.col);
+            }
+            break;
+
         }
     },
     postfix: function (node) {
@@ -191,7 +216,8 @@ const vdef={
     },
     "number": function (node) {
         // node.text
-
+        if (node.text.indexOf(".")>=0) node.exprType=types.double;
+        else node.exprType=types.int;
     },
     fieldDecl: function (node) {
         //node.name
