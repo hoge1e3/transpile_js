@@ -59,6 +59,16 @@ class Class {
         this.methods[method.name]=method;
     }
 }
+class MapType {//写像   1119
+    constructor(inputs , output  ) {
+        // inputs を入力として output を返す写像を定義
+        // inputsは複数個入るので型(Class)の配列，outputは単独の型
+        // 数学風に書くなら::  inputs -> output
+        this.inputs=inputs;
+        this.output=output;
+    }
+}
+
 let curClass; // 今解析中のクラスオブジェクト
 let curMethod; // 今解析中のメソッドオブジェクト
 //1029追加
@@ -127,11 +137,13 @@ const vdef={
         var lt=node.left.exprType,rt=node.right.exprType;
         switch (node.op.text) {
         case "=":
+        // 1112宿題
             if (lt===types.double && rt === types.int) {
                 node.exprType=types.double;
             } else if (lt===rt) {
                 node.exprType=lt;
             } else {
+                console.log("= error", lt, rt);
                 throw new Error("Cannot use "+node.op.text+" in this type "+node.op.row+":"+node.op.col);
             }
             break;
@@ -144,6 +156,7 @@ const vdef={
         var lt=node.left.exprType,rt=node.right.exprType;
         switch (node.op.text) {
         case "+":case "-":case "*":case "/":case "%":
+        // 1112宿題
             if (lt===types.int && rt===types.int) {
                 node.exprType=types.int;
             }else if (lt===types.double && rt===types.double) {
@@ -157,6 +170,7 @@ const vdef={
             }
             break;
         case "^":case "&":case "|":case "<<":case ">>":case ">>>":
+        // 1112宿題
             if (lt===types.int && rt===types.int) {
                 node.exprType=types.int;
             }else {
@@ -187,9 +201,23 @@ const vdef={
             if (f) {//フィールドとして見つかった場合
                 // a.b 自身の型は f.type
                 node.exprType=f.type;
-            } else if (m) {
-                //TODO
+            } else if (m) {//メソッドとして見つかった場合
+                /*1119*/
+                console.log("method found",m);
+                //1119宿題：引数の型(inputs)を正しく追加する
+                node.exprType=new MapType([/*1119宿題*/] , m.returnType  );
+                console.log("method type",node.exprType);//確認用
             }
+        }
+        if (node.op.type==="args") {// f(x,y)     1119
+            //1119宿題
+            //argsの中（引数）をvisit して，それぞれの式に含まれる変数の種類
+            //（フィールドorローカルor引数）を判別させる
+            console.log("args",node.op);
+            var leftType=node.left.exprType;
+            if (!leftType) return;// window.f() の場合は型がない
+            // leftTypeはMapTypeのはず
+            node.exprType=leftType.output;
         }
         //----
     },
@@ -204,6 +232,8 @@ const vdef={
                 throw new Error("Type "+node.right.left.text+" not found "+
                 node.op.row+":"+node.op.col);
             }
+            // 1119宿題：ここでもargsを辿る必要がある
+            console.log("args(new)",node.right.op);
         } else {
             this.visit(node.right);
         }
@@ -215,7 +245,7 @@ const vdef={
         // node.name
     },
     "number": function (node) {
-        // node.text
+        // 1112宿題
         if (node.text.indexOf(".")>=0) node.exprType=types.double;
         else node.exprType=types.int;
     },

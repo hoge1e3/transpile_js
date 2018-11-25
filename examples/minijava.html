@@ -1,20 +1,32 @@
 <form name="prog">
    <textarea name="text" rows=15 cols=40>
-class Sub1 {
-  int p;
-  int add() {
-     p=p+1;
+class Vector{
+  double x;
+  double y;
+  Vector add(Vector o) {
+     return new Vector(x+o.x,y+o.y);
+  }
+  double length() {
+     return window.Math.sqrt(x*x+y*y);
+  }
+  Vector mul(double k) {
+     return new Vector(x*k,y*k);
+  }
+  Vector norm() {
+     return mul(1/dist());
   }
 }
-class Sub2 {
-  Sub1 s1;
-}
 class Main {
-  Sub2 s2;
   int main() {
-     s2=new Sub1(new Sub1(10));
-     s2.s1.add();
-     window.console.log(s2.s1.p);
+	   Vector v1;
+	   Vector v2;
+      Vector v3;
+      v1=new Vector(1,4);
+      v2=new Vector(-2,5);
+      window.console.log(v1.length());
+      window.console.log(v2.length());
+      v3=v1.add(v2);
+      window.console.log(v3.x,v3.y);
   }
 }
    </textarea>
