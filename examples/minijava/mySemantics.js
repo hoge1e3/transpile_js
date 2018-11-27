@@ -166,6 +166,7 @@ const vdef={
             }else if (lt===types.double && rt===types.int) {
                 node.exprType=types.double;
             }else {
+                console.log("Cannot use "+node.op.text+" in ",lt,rt);
                 throw new Error("Cannot use "+node.op.text+" in this type "+node.op.row+":"+node.op.col);
             }
             break;
@@ -205,11 +206,16 @@ const vdef={
                 /*1119*/
                 console.log("method found",m);
                 //1119宿題：引数の型(inputs)を正しく追加する
-                node.exprType=new MapType([/*1119宿題*/] , m.returnType  );
+                const paramTypes=[];
+                for (const param of m.params) {
+                    paramTypes.push(m.type);
+                }
+                node.exprType=new MapType(paramTypes , m.returnType  );
                 console.log("method type",node.exprType);//確認用
             }
         }
         if (node.op.type==="args") {// f(x,y)     1119
+            this.visit(node.op);
             //1119宿題
             //argsの中（引数）をvisit して，それぞれの式に含まれる変数の種類
             //（フィールドorローカルor引数）を判別させる
@@ -226,7 +232,9 @@ const vdef={
         console.log("prefix", node);
         if (node.op.type==="new") {//1112
             //  new XXXX();
+            console.log("new args=",node.right.op);
             console.log("new type=",node.right.left.text);
+            this.visit(node.right.op);
             node.exprType=nameToType(node.right.left.text);
             if (!node.exprType) {
                 throw new Error("Type "+node.right.left.text+" not found "+
@@ -240,6 +248,9 @@ const vdef={
     },
     args: function (node) {
         // node.arg
+        for (var arg of node.args) {
+            this.visit(arg);
+        }
     },
     memberRef: function (node) {
         // node.name
@@ -282,11 +293,17 @@ const vdef={
         if (f) {
             node.exprType=f.type; //1029追加
         }
-        /*if (m) {
-            node.exprType=m.type; //1029追加
-        }*/
+        if (m) {
+            const paramTypes=[];
+            for (const param of m.params) {
+                paramTypes.push(m.type);
+            }
+            node.exprType=new MapType(paramTypes , m.returnType  ); //1029追加
+        }
     },
-
+    returnStmt: function (node) {
+        this.visit(node.expr);
+    }
 };
 const Semantics= {
     check: function (node) {

@@ -6,16 +6,22 @@ define(["lang/Grammar"], function (Grammar) {
     //トークンの定義
     const tdef={
         tokens: [{"this":tokenizer.rep0("token")}, /^\s*/ ,P.StringParser.eof],
-        token: tokenizer.or("new"/*1112*/,"if","while","return"/*1119*/,"class","else","int","double","symbol","number",
+        token: tokenizer.or("new"/*1112*/,"if","while","return"/*1119*/,
+        "class","else","int","double","void"/*1126*/,"String"/*1126*/,"boolean"/*1126*/,
+        "symbol","number","literal"/*1126*/,
         "<<",">>>",">>",
         "<=",">=","!=","==",">","<","!",
         "(",")","{","}","+","-","=","*",";",".",",","/","&","^","|"),
+        literal: /^"[^"]*"/,/*1126*/
         if: "'if",
         else: "'else",
         while: "'while",
         class: "'class",
         int: "'int",
         double: "'double",
+        void: "'void",  /*1126*/
+        String: "'String",/*1126*/
+        boolean: "'boolean",/*1126*/
         new: "'new",//1112
         return: "'return",/*1119*/
         symbol: /^[a-zA-Z_$][a-zA-Z_$0-9]*/,
@@ -72,7 +78,7 @@ define(["lang/Grammar"], function (Grammar) {
         "}"],
         params: sep0("param", ","),
         param: [{typeName:"typeName"},{name:"symbol"}],
-        typeName: or("int","double","symbol"),
+        typeName: or("int","double","void"/*1126*/,"boolean"/*1126*/,"String"/*1126*/,"symbol"),
         stmt: or("exprStmt","localDecl","ctrlStmt","block","returnStmt"/*1119*/),
         ctrlStmt: or("ifStmt","whileStmt"),
         ifStmt: ["if","(",{cond:"expr"},")",{then:"stmt"},
@@ -83,7 +89,7 @@ define(["lang/Grammar"], function (Grammar) {
         exprStmt: [{expr:"expr"} , ";"],
         returnStmt: ["return",{expr:opt("expr")} , ";"],/*1119*/
         expr:  g.expr({
-            element: or("number","symbol"),
+            element: or("number","symbol", "literal"),
             operators: [// 優先順位(低い)
                 ["infixr", "="  ] , //  = 右結合２項演算子
                 ["infixl", or(">=","<=","==","!=",">","<")  ] , //  + -  左結合２項演算子
@@ -103,7 +109,10 @@ define(["lang/Grammar"], function (Grammar) {
         "args": ["(", {args:g.sep0("expr", "," )}  , ")"],
         "memberRef": ["." , {name:"symbol"} ],
         "number": tk("number"),
-        ";": tk(";"),"class":tk("class"),"int":tk("int"),"double":tk("double"),
+        ";": tk(";"),"class":tk("class"),
+        "int":tk("int"),"double":tk("double"),
+        "String":tk("String"),"boolean":tk("boolean"),"void":tk("void"),/*1126*/
+        "literal": tk("literal"), /*1126*/
         "return": tk("return"),/*1119*/
         "{": tk("{"), "}":tk("}"),"(": tk("("), ")":tk(")"),
         "=": tk("="),  "+": tk("+"), "-": tk("-"),  "*": tk("*"), "/":tk("/"), ",":tk(","),

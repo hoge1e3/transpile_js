@@ -1,32 +1,19 @@
 <form name="prog">
    <textarea name="text" rows=15 cols=40>
-class Vector{
-  double x;
-  double y;
-  Vector add(Vector o) {
-     return new Vector(x+o.x,y+o.y);
-  }
-  double length() {
-     return window.Math.sqrt(x*x+y*y);
-  }
-  Vector mul(double k) {
-     return new Vector(x*k,y*k);
-  }
-  Vector norm() {
-     return mul(1/dist());
-  }
-}
 class Main {
-  int main() {
-	   Vector v1;
-	   Vector v2;
-      Vector v3;
-      v1=new Vector(1,4);
-      v2=new Vector(-2,5);
-      window.console.log(v1.length());
-      window.console.log(v2.length());
-      v3=v1.add(v2);
-      window.console.log(v3.x,v3.y);
+  void main() {
+     boolean b;
+     String xis;
+     double x;
+     double y;
+     xis="x is ";
+     x=3;y=5;
+     b=(x<y);
+     if (b) {
+        window.console.log(xis+"smaller");
+     } else {
+        window.console.log(xis+"bigger");
+     }
   }
 }
    </textarea>
