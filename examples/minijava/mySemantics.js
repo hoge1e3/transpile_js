@@ -75,7 +75,11 @@ let curMethod; // 今解析中のメソッドオブジェクト
 let types={
     int: new Class("int"),
     double: new Class("double"),
+    void: new Class("void"),//1126宿題
+    string: new Class("string"),//1126宿題
+    boolean: new Class("boolean"),//1126宿題
 };  // 型の名前  → 実際の型(Class)オブジェクト
+types.String=types.string;//1126宿題
 function nameToType(typeName) {//名前からClassオブジェクトを取得
     return types[typeName];
 }
@@ -124,6 +128,9 @@ const vdef={
     },
     localDecl: function (node) {
         // 1022宿題: 現在のメソッドにローカル変数を追加
+        if (node.typeName.text==="void") {//1126宿題
+            throw new Error("Cannot declare void variable "+node.typeName.row+":"+node.typeName.col);
+        }
         curMethod.locals[node.name]=new Local(node.typeName, node.name.text);
     },
     exprStmt: function (node) {
@@ -155,6 +162,15 @@ const vdef={
         this.visit(node.right);
         var lt=node.left.exprType,rt=node.right.exprType;
         switch (node.op.text) {
+        case ">":case "<":case ">=":case "<=":case "!=":case "=="://1126宿題
+            if ((lt===types.int || lt===types.double) &&
+                (rt===types.int || rt===types.double)) {
+                node.exprType=types.boolean;
+            } else {
+                console.log("Cannot use "+node.op.text+" in ",lt,rt);
+                throw new Error("Cannot use "+node.op.text+" in this type "+node.op.row+":"+node.op.col);
+            }
+            break;
         case "+":case "-":case "*":case "/":case "%":
         // 1112宿題
             if (lt===types.int && rt===types.int) {
@@ -165,6 +181,8 @@ const vdef={
                 node.exprType=types.double;
             }else if (lt===types.double && rt===types.int) {
                 node.exprType=types.double;
+            } else if (node.op.text==="+" && (lt===types.string || rt===types.string)) {//1126宿題
+                node.exprType=types.string;
             }else {
                 console.log("Cannot use "+node.op.text+" in ",lt,rt);
                 throw new Error("Cannot use "+node.op.text+" in this type "+node.op.row+":"+node.op.col);
@@ -260,6 +278,9 @@ const vdef={
         if (node.text.indexOf(".")>=0) node.exprType=types.double;
         else node.exprType=types.int;
     },
+    literal : function (node) {//1126宿題
+        node.exprType=types.string;
+    },
     fieldDecl: function (node) {
         //node.name
         console.log("fieldDecl",node, node.name.text);
@@ -303,6 +324,18 @@ const vdef={
     },
     returnStmt: function (node) {
         this.visit(node.expr);
+    },
+    ifStmt: function (node) {//1126宿題
+        console.log("if",node);
+        this.visit(node.cond);
+        if (node.cond.exprType!==types.boolean) {
+            throw new Error("Use boolean type as if condition "+node[0].row+":"+node[0].col);
+        }
+        this.visit(node.then);
+        if (node.elsePart) this.visit(node.elsePart.else);
+    },
+    block: function (node) {//1126宿題
+        for (const b of node.body) this.visit(b);
     }
 };
 const Semantics= {

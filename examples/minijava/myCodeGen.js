@@ -130,6 +130,9 @@ const vdef={
             this.printf("this.%s",node);
         }
     },
+    literal: function (node) {//1126宿題
+        this.printf("%s",node);
+    }
 
 };
 const Generator= {
