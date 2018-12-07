@@ -163,7 +163,9 @@ const vdef={
         var lt=node.left.exprType,rt=node.right.exprType;
         switch (node.op.text) {
         case ">":case "<":case ">=":case "<=":case "!=":case "=="://1126宿題
-            if ((lt===types.int || lt===types.double) &&
+            if ((node.op.text==="==" || node.op.text==="!=") && lt===rt) {
+                node.exprType=types.boolean;
+            } else if ((lt===types.int || lt===types.double) &&
                 (rt===types.int || rt===types.double)) {
                 node.exprType=types.boolean;
             } else {
@@ -226,7 +228,7 @@ const vdef={
                 //1119宿題：引数の型(inputs)を正しく追加する
                 const paramTypes=[];
                 for (const param of m.params) {
-                    paramTypes.push(m.type);
+                    paramTypes.push(param.type);// <-訂正1203： m.type -> param.type
                 }
                 node.exprType=new MapType(paramTypes , m.returnType  );
                 console.log("method type",node.exprType);//確認用
@@ -241,6 +243,13 @@ const vdef={
             var leftType=node.left.exprType;
             if (!leftType) return;// window.f() の場合は型がない
             // leftTypeはMapTypeのはず
+            // TODO1203(1) 実引数と仮引数の個数が等しいかチェック
+            // leftType と node.op をうまく使ってチェックしましょう
+            console.log("arg-check",leftType, node.op);
+
+            // TODO1203(2) それぞれの実引数と仮引数の型に互換性があるかチェック
+            //  for i=0..N-1  (Nは引数の個数)
+            //     仮引数[i] = 実引数[i] （仮引数[i]への実引数[i]の代入） ができるか
             node.exprType=leftType.output;
         }
         //----
@@ -248,7 +257,7 @@ const vdef={
     prefix: function (node) {
         // node.op node.right
         console.log("prefix", node);
-        if (node.op.type==="new") {//1112
+        /*if (node.op.type==="new") {//1112 //del 1203
             //  new XXXX();
             console.log("new args=",node.right.op);
             console.log("new type=",node.right.left.text);
@@ -260,9 +269,10 @@ const vdef={
             }
             // 1119宿題：ここでもargsを辿る必要がある
             console.log("args(new)",node.right.op);
-        } else {
+        } else {*/
             this.visit(node.right);
-        }
+            node.exprType=node.right.exprType;//add 1203
+        //}
     },
     args: function (node) {
         // node.arg
@@ -295,11 +305,12 @@ const vdef={
         const m=curClass.getMethod(node.text);
         const p=curMethod.getParam(node.text);
         const l=curMethod.getLocal(node.text);
+        const c=types[node.text];//add 1203
         // 1022宿題： ローカル変数の存在もチェックする
         if (node.text==="window") {//1112
             return;
         }
-        if (!f && !m && !p && !l)  {
+        if (!f && !m && !p && !l && !c)  {//change 1203
             throw new Error(node.text+" is not defined");
         }
         if (p) {//  p==null やundefined以外
@@ -317,9 +328,18 @@ const vdef={
         if (m) {
             const paramTypes=[];
             for (const param of m.params) {
-                paramTypes.push(m.type);
+                paramTypes.push(param.type); // <-訂正1203： m.type -> param.type
             }
+            // NG  node.exprType=new MapType(m.params , m.returnType  );
             node.exprType=new MapType(paramTypes , m.returnType  ); //1029追加
+        }
+        if (c) {// add 1203
+            const paramTypes=[];
+            node.isClass=true;
+            for (const k in c.fields ) {
+                paramTypes.push(c.getField(k).type);
+            }
+            node.exprType=new MapType(paramTypes, c);
         }
     },
     returnStmt: function (node) {
