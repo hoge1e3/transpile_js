@@ -246,10 +246,19 @@ const vdef={
             // TODO1203(1) 実引数と仮引数の個数が等しいかチェック
             // leftType と node.op をうまく使ってチェックしましょう
             console.log("arg-check",leftType, node.op);
-
+            const paramTypes=leftType.inputs, args=node.op.args;
+            if (paramTypes.length!==args.length) {
+                throw new Error("# of Arg/param not match  args="+node.op.args.length+" params="+leftType.inputs.length);
+            }
             // TODO1203(2) それぞれの実引数と仮引数の型に互換性があるかチェック
             //  for i=0..N-1  (Nは引数の個数)
             //     仮引数[i] = 実引数[i] （仮引数[i]への実引数[i]の代入） ができるか
+            for (let i=0;i<args.length;i++) {
+                if (args[i].exprType && args[i].exprType!==paramTypes[i]) {
+                    console.log("typenotmatch",args[i].exprType, paramTypes[i]);
+                    throw new Error((i+1)+"th arg/param type not match "+args[i].row+":"+args[i].col);
+                }
+            }
             node.exprType=leftType.output;
         }
         //----
