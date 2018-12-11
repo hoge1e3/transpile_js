@@ -392,6 +392,15 @@ const vdef={
         this.visit(node.then);
         if (node.elsePart) this.visit(node.elsePart.else);
     },
+    whileStmt: function (node) {
+        console.log("whileStmt",node);
+        this.visit(node.cond);
+        if (node.cond.exprType!==types.boolean) {
+            throw new Error("Use boolean type as if condition "+node[0].row+":"+node[0].col);
+        }
+        this.visit(node.do);
+        //if (node.elsePart) this.visit(node.elsePart.else);
+    },
     block: function (node) {//1126宿題
         for (const b of node.body) this.visit(b);
     }
