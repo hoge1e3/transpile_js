@@ -8,11 +8,12 @@ define(["lang/Grammar"], function (Grammar) {
         tokens: [{"this":tokenizer.rep0("token")}, /^\s*/ ,P.StringParser.eof],
         token: tokenizer.or("new"/*1112*/,"if","while","return"/*1119*/,
         "class","else","int","double","void"/*1126*/,"String"/*1126*/,"boolean"/*1126*/,
-        "symbol","number","literal"/*1126*/,
+        "extends"/*1210*/,"symbol","number","literal"/*1126*/,
         "<<",">>>",">>",
         "<=",">=","!=","==",">","<","!",
         "(",")","{","}","+","-","=","*",";",".",",","/","&","^","|"),
         literal: /^"[^"]*"/,/*1126*/
+        extends: "'extends",/*1210*/
         if: "'if",
         else: "'else",
         while: "'while",
@@ -68,7 +69,8 @@ define(["lang/Grammar"], function (Grammar) {
     //構文の定義
     const gdef={
         program: [{body:rep0("classDef")},P.TokensParser.eof],
-        classDef: ["class", {name:"symbol"}, "{", {members: rep0("member")},  "}"],
+        classDef: ["class", {name:"symbol"}, {parentClass:opt("parentClass")}/*1210*/, "{", {members: rep0("member")},  "}"],
+        parentClass: ["extends",{name:"symbol"}],/*1210*/
         member: or("fieldDecl", "methodDef"),
         fieldDecl: [{typeName:"typeName"},{name:"symbol"},";"],
         localDecl: [{typeName:"typeName"},{name:"symbol"},";"],
@@ -109,7 +111,7 @@ define(["lang/Grammar"], function (Grammar) {
         "args": ["(", {args:g.sep0("expr", "," )}  , ")"],
         "memberRef": ["." , {name:"symbol"} ],
         "number": tk("number"),
-        ";": tk(";"),"class":tk("class"),
+        ";": tk(";"),"class":tk("class"),"extends":tk("extends"),/*1210*/
         "int":tk("int"),"double":tk("double"),
         "String":tk("String"),"boolean":tk("boolean"),"void":tk("void"),/*1126*/
         "literal": tk("literal"), /*1126*/

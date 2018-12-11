@@ -6,6 +6,7 @@ class Field {
     constructor(type, name) {
         console.log("Field name=",name,"type=",type);
         this.type=nameToType(type);//1029変更
+        if (!this.type) throw new Error("Type "+type+" not defined");//1210
         this.name=name;
     }
 }
@@ -41,10 +42,30 @@ class Local {// 1022宿題:Paramと同じ
     }
 }
 class Class {
-    constructor(name) {
+    constructor(name, superClass) {
         this.name=name;
         this.fields={ };// {name: Field}
         this.methods={ };// {name: Method}
+        this.superClass=superClass;
+    }
+    isAssignableFrom(right) {//1210
+        // right:Class の値がこのクラスの変数に代入可能ならtrue
+        if (this===right) return true;
+        // right が thisの子クラスなら，true
+        return this.isSuperclassOf(right);
+    }
+    isSuperclassOf(sclass) {//1210
+        // thisがsclassのスーパークラスならtrue
+        if (sclass==null) return false;
+        if (this===sclass.superClass) return true;
+        return this.isSuperclassOf(sclass.superClass);
+        /*let s;
+        for (s=sclass.superClass;s&&s!==this;s=s.superClass);
+        return !!s;*/
+    }
+    isSubclassOf(sclass) {
+        // thisがsclassのサブクラスならtrue
+        return sclass.isSuperclassOf(this);
     }
     getField(name) {
         return this.fields[name];
@@ -73,12 +94,16 @@ let curClass; // 今解析中のクラスオブジェクト
 let curMethod; // 今解析中のメソッドオブジェクト
 //1029追加
 let types={
-    int: new Class("int"),
-    double: new Class("double"),
+    //int: new Class("int"),
+    //double: new Class("double"),
     void: new Class("void"),//1126宿題
     string: new Class("string"),//1126宿題
     boolean: new Class("boolean"),//1126宿題
 };  // 型の名前  → 実際の型(Class)オブジェクト
+// 1210宿題：intをdoubleのサブクラスにする．
+types.int=new Class("int");
+types.double=new Class("double");
+
 types.String=types.string;//1126宿題
 function nameToType(typeName) {//名前からClassオブジェクトを取得
     return types[typeName];
@@ -97,7 +122,12 @@ const vdef={
                 filter((member)=>member.type==="fieldDecl"),
             methods=node.members.
         filter((member)=>member.type==="methodDef");
-        curClass = new Class( node.name );
+        let superClass;
+        if (node.parentClass) {
+            superClass=nameToType(node.parentClass.name);
+        }
+        curClass = new Class( node.name, superClass );
+        console.log("curClass",curClass);
         types[node.name] = curClass;//1029追加
         console.log("classDef",node);
         for (const m of methods) {
@@ -144,7 +174,7 @@ const vdef={
         var lt=node.left.exprType,rt=node.right.exprType;
         switch (node.op.text) {
         case "=":
-        // 1112宿題
+        // 1112宿題 , 1210宿題(isAssignableFromをつかってすっきり書け)
             if (lt===types.double && rt === types.int) {
                 node.exprType=types.double;
             } else if (lt===rt) {
@@ -248,7 +278,7 @@ const vdef={
             console.log("arg-check",leftType, node.op);
             const paramTypes=leftType.inputs, args=node.op.args;
             if (paramTypes.length!==args.length) {
-                throw new Error("# of Arg/param not match  args="+node.op.args.length+" params="+leftType.inputs.length);
+                throw new Error("# of Arg/param not match  args="+node.op.args.length+" params="+leftType.inputs.length+ "row = "+node.op.args[0].row);
             }
             // TODO1203(2) それぞれの実引数と仮引数の型に互換性があるかチェック
             //  for i=0..N-1  (Nは引数の個数)
@@ -370,6 +400,7 @@ const vdef={
 const Semantics= {
     check: function (node) {
         const v=Visitor(vdef);
+        window.types=types;
         v.def=function (node) {
             if (node==null) console.log("Semantics.check.def","NULL");
             else console.log("Semantics.check.def",node.type, node);
