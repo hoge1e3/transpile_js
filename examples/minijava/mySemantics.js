@@ -101,8 +101,8 @@ let types={
     boolean: new Class("boolean"),//1126宿題
 };  // 型の名前  → 実際の型(Class)オブジェクト
 // 1210宿題：intをdoubleのサブクラスにする．
-types.int=new Class("int");
 types.double=new Class("double");
+types.int=new Class("int",types.double);
 
 types.String=types.string;//1126宿題
 function nameToType(typeName) {//名前からClassオブジェクトを取得
@@ -175,9 +175,7 @@ const vdef={
         switch (node.op.text) {
         case "=":
         // 1112宿題 , 1210宿題(isAssignableFromをつかってすっきり書け)
-            if (lt===types.double && rt === types.int) {
-                node.exprType=types.double;
-            } else if (lt===rt) {
+            if (lt.isAssignableFrom(rt)) {
                 node.exprType=lt;
             } else {
                 console.log("= error", lt, rt);
@@ -284,8 +282,9 @@ const vdef={
             //  for i=0..N-1  (Nは引数の個数)
             //     仮引数[i] = 実引数[i] （仮引数[i]への実引数[i]の代入） ができるか
             for (let i=0;i<args.length;i++) {
-                if (args[i].exprType && args[i].exprType!==paramTypes[i]) {
-                    console.log("typenotmatch",args[i].exprType, paramTypes[i]);
+                const atype=args[i].exprType, ptype=paramTypes[i];
+                if (atype && ptype && !ptype.isAssignableFrom(atype)) {
+                    console.log("typenotmatch",atype,"->",ptype);
                     throw new Error((i+1)+"th arg/param type not match "+args[i].row+":"+args[i].col);
                 }
             }
