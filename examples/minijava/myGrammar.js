@@ -1,6 +1,6 @@
 ﻿// MINIJAVA
 define(["lang/Grammar"], function (Grammar) {
-    const spc=/^\s*/;
+    const spc=/^(\s|(\/\/.*\n))*/;
     const tokenizer=new Grammar({space:spc});
     const P=Grammar.P;
     //トークンの定義
