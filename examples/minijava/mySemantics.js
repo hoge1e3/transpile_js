@@ -91,6 +91,7 @@ class MapType {//写像   1119
     }
 }
 let pass;
+let loopDepth=0;
 let curClass; // 今解析中のクラスオブジェクト
 let curMethod; // 今解析中のメソッドオブジェクト
 //1029追加
@@ -398,15 +399,20 @@ const vdef={
     },
     whileStmt: function (node) {
         console.log("whileStmt",node);
+        loopDepth++;
         this.visit(node.cond);
         if (node.cond.exprType!==types.boolean) {
             throw_new_Error("Use boolean type as if condition "+node[0].row+":"+node[0].col);
         }
         this.visit(node.do);
+        loopDepth--;
         //if (node.elsePart) this.visit(node.elsePart.else);
     },
     block: function (node) {//1126宿題
         for (const b of node.body) this.visit(b);
+    },
+    breakStmt: function (node) {
+        if (loopDepth==0) throw_new_Error("use break in loop");
     }
 };
 const Semantics= {
@@ -417,6 +423,7 @@ const Semantics= {
             if (node==null) console.log("Semantics.check.def","NULL");
             else console.log("Semantics.check.def",node.type, node);
         };
+        loopDepth=0;
         for (pass=1;pass<=2;pass++) {
             v.visit(node);
         }

@@ -135,6 +135,9 @@ const vdef={
     },
     literal: function (node) {//1126宿題
         this.printf("%s",node);
+    },
+    breakStmt: function (node) {
+        this.printf("break;%n");
     }
 
 };
