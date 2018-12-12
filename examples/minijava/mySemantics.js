@@ -50,6 +50,7 @@ class Class {
     }
     isAssignableFrom(right) {//1210
         // right:Class の値がこのクラスの変数に代入可能ならtrue
+        if (!right) return true;
         if (this===right) return true;
         // right が thisの子クラスなら，true
         return this.isSuperclassOf(right);
@@ -175,7 +176,7 @@ const vdef={
         switch (node.op.text) {
         case "=":
         // 1112宿題 , 1210宿題(isAssignableFromをつかってすっきり書け)
-            if (lt.isAssignableFrom(rt)) {
+            if (lt && lt.isAssignableFrom(rt)) {
                 node.exprType=lt;
             } else {
                 console.log("= error", lt, rt);
