@@ -387,6 +387,17 @@ const vdef={
     },
     returnStmt: function (node) {
         this.visit(node.expr);
+        if (!node.expr && curMethod.returnType!==types.void) {
+            throw_new_Error("return stmt should have return value");
+            return;
+        }
+        if (node.expr && curMethod.returnType===types.void) {
+            throw_new_Error("void cannot return value");
+            return;
+        }
+        if (!curMethod.returnType.isAssignableFrom(node.expr.exprType)) {
+            throw_new_Error("Return type not match");
+        }
     },
     ifStmt: function (node) {//1126宿題
         console.log("if",node);
