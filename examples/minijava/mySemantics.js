@@ -6,7 +6,7 @@ class Field {
     constructor(type, name) {
         console.log("Field name=",name,"type=",type);
         this.type=nameToType(type);//1029変更
-        if (!this.type) throw new Error("Type "+type+" not defined");//1210
+        if (!this.type) throw_new_Error("Type "+type+" not defined");//1210
         this.name=name;
     }
 }
@@ -90,7 +90,7 @@ class MapType {//写像   1119
         this.output=output;
     }
 }
-
+let pass;
 let curClass; // 今解析中のクラスオブジェクト
 let curMethod; // 今解析中のメソッドオブジェクト
 //1029追加
@@ -108,6 +108,9 @@ types.int=new Class("int",types.double);
 types.String=types.string;//1126宿題
 function nameToType(typeName) {//名前からClassオブジェクトを取得
     return types[typeName];
+}
+function throw_new_Error(m) {
+    if (pass==2) throw new Error(m);
 }
 //----
 
@@ -160,7 +163,7 @@ const vdef={
     localDecl: function (node) {
         // 1022宿題: 現在のメソッドにローカル変数を追加
         if (node.typeName.text==="void") {//1126宿題
-            throw new Error("Cannot declare void variable "+node.typeName.row+":"+node.typeName.col);
+            throw_new_Error("Cannot declare void variable "+node.typeName.row+":"+node.typeName.col);
         }
         curMethod.locals[node.name]=new Local(node.typeName, node.name.text);
     },
@@ -180,7 +183,7 @@ const vdef={
                 node.exprType=lt;
             } else {
                 console.log("= error", lt, rt);
-                throw new Error("Cannot use "+node.op.text+" in this type "+node.op.row+":"+node.op.col);
+                throw_new_Error("Cannot use "+node.op.text+" in this type "+node.op.row+":"+node.op.col);
             }
             break;
         }
@@ -199,7 +202,7 @@ const vdef={
                 node.exprType=types.boolean;
             } else {
                 console.log("Cannot use "+node.op.text+" in ",lt,rt);
-                throw new Error("Cannot use "+node.op.text+" in this type "+node.op.row+":"+node.op.col);
+                throw_new_Error("Cannot use "+node.op.text+" in this type "+node.op.row+":"+node.op.col);
             }
             break;
         case "+":case "-":case "*":case "/":case "%":
@@ -216,7 +219,7 @@ const vdef={
                 node.exprType=types.string;
             }else {
                 console.log("Cannot use "+node.op.text+" in ",lt,rt);
-                throw new Error("Cannot use "+node.op.text+" in this type "+node.op.row+":"+node.op.col);
+                throw_new_Error("Cannot use "+node.op.text+" in this type "+node.op.row+":"+node.op.col);
             }
             break;
         case "^":case "&":case "|":case "<<":case ">>":case ">>>":
@@ -224,7 +227,7 @@ const vdef={
             if (lt===types.int && rt===types.int) {
                 node.exprType=types.int;
             }else {
-                throw new Error("Cannot use "+node.op.text+" in this type "+node.op.row+":"+node.op.col);
+                throw_new_Error("Cannot use "+node.op.text+" in this type "+node.op.row+":"+node.op.col);
             }
             break;
 
@@ -245,7 +248,7 @@ const vdef={
             var m=leftType.getMethod(node.op.name);
             var f=leftType.getField(node.op.name);
             if (!m && !f) {//なければエラー
-                throw new Error("Method or Field "+node.op.name+
+                throw_new_Error("Method or Field "+node.op.name+
                 " not found in type "+leftType.name);
             }
             if (f) {//フィールドとして見つかった場合
@@ -277,7 +280,7 @@ const vdef={
             console.log("arg-check",leftType, node.op);
             const paramTypes=leftType.inputs, args=node.op.args;
             if (paramTypes.length!==args.length) {
-                throw new Error("# of Arg/param not match  args="+node.op.args.length+" params="+leftType.inputs.length+ "row = "+node.op.args[0].row);
+                throw_new_Error("# of Arg/param not match  args="+node.op.args.length+" params="+leftType.inputs.length+ "row = "+node.op.args[0].row);
             }
             // TODO1203(2) それぞれの実引数と仮引数の型に互換性があるかチェック
             //  for i=0..N-1  (Nは引数の個数)
@@ -286,7 +289,7 @@ const vdef={
                 const atype=args[i].exprType, ptype=paramTypes[i];
                 if (atype && ptype && !ptype.isAssignableFrom(atype)) {
                     console.log("typenotmatch",atype,"->",ptype);
-                    throw new Error((i+1)+"th arg/param type not match "+args[i].row+":"+args[i].col);
+                    throw_new_Error((i+1)+"th arg/param type not match "+args[i].row+":"+args[i].col);
                 }
             }
             node.exprType=leftType.output;
@@ -303,7 +306,7 @@ const vdef={
             this.visit(node.right.op);
             node.exprType=nameToType(node.right.left.text);
             if (!node.exprType) {
-                throw new Error("Type "+node.right.left.text+" not found "+
+                throw_new_Error("Type "+node.right.left.text+" not found "+
                 node.op.row+":"+node.op.col);
             }
             // 1119宿題：ここでもargsを辿る必要がある
@@ -350,7 +353,7 @@ const vdef={
             return;
         }
         if (!f && !m && !p && !l && !c)  {//change 1203
-            throw new Error(node.text+" is not defined");
+            throw_new_Error(node.text+" is not defined");
         }
         if (p) {//  p==null やundefined以外
             node.isParam=true;
@@ -388,7 +391,7 @@ const vdef={
         console.log("if",node);
         this.visit(node.cond);
         if (node.cond.exprType!==types.boolean) {
-            throw new Error("Use boolean type as if condition "+node[0].row+":"+node[0].col);
+            throw_new_Error("Use boolean type as if condition "+node[0].row+":"+node[0].col);
         }
         this.visit(node.then);
         if (node.elsePart) this.visit(node.elsePart.else);
@@ -397,7 +400,7 @@ const vdef={
         console.log("whileStmt",node);
         this.visit(node.cond);
         if (node.cond.exprType!==types.boolean) {
-            throw new Error("Use boolean type as if condition "+node[0].row+":"+node[0].col);
+            throw_new_Error("Use boolean type as if condition "+node[0].row+":"+node[0].col);
         }
         this.visit(node.do);
         //if (node.elsePart) this.visit(node.elsePart.else);
@@ -414,7 +417,9 @@ const Semantics= {
             if (node==null) console.log("Semantics.check.def","NULL");
             else console.log("Semantics.check.def",node.type, node);
         };
-        v.visit(node);
+        for (pass=1;pass<=2;pass++) {
+            v.visit(node);
+        }
     }
 };
 return Semantics;
