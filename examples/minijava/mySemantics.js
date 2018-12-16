@@ -108,7 +108,9 @@ types.int=new Class("int",types.double);
 
 types.String=types.string;//1126宿題
 function nameToType(typeName) {//名前からClassオブジェクトを取得
-    return types[typeName];
+    const t=types[typeName];
+    if (!t) throw_new_Error("Type "+typeName+" not defined");
+    return t;
 }
 function throw_new_Error(m) {
     if (pass==2) throw new Error(m);
