@@ -1,6 +1,6 @@
 ﻿// MINIJAVA
 define(["lang/Grammar"], function (Grammar) {
-    const spc=/^\s*/;
+    const spc=/^\s*/;    //冬休み課題 コメントを飛ばす
     const tokenizer=new Grammar({space:spc});
     const P=Grammar.P;
     //トークンの定義
@@ -91,7 +91,7 @@ define(["lang/Grammar"], function (Grammar) {
         exprStmt: [{expr:"expr"} , ";"],
         returnStmt: ["return",{expr:opt("expr")} , ";"],/*1119*/
         expr:  g.expr({
-            element: or("number","symbol", "literal"),
+            element: or("number","symbol", "literal","paren"),// 冬休み課題[3]
             operators: [// 優先順位(低い)
                 ["infixr", "="  ] , //  = 右結合２項演算子
                 ["infixl", or(">=","<=","==","!=",">","<")  ] , //  + -  左結合２項演算子
@@ -107,6 +107,7 @@ define(["lang/Grammar"], function (Grammar) {
                 // 優先順位(高い)
             ]
         }),
+        //"paren":  冬休み課題[3]
         "new": tk("new"),//1112
         "args": ["(", {args:g.sep0("expr", "," )}  , ")"],
         "memberRef": ["." , {name:"symbol"} ],

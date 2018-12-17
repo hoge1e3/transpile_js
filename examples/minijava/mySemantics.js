@@ -92,6 +92,11 @@ class MapType {//写像   1119
 
 let curClass; // 今解析中のクラスオブジェクト
 let curMethod; // 今解析中のメソッドオブジェクト
+let pass; // 冬休み課題[2]  pass=1   エラーがあっても実際にはエラーを出さない
+//                         pass=2   エラーがあったらエラーを出す（従来通り）
+let loopDepth; // 冬休み課題[4] while に入ると1増えて，出ると1減る
+//                loopDepthが0のときにbreak があったらエラーを出す．
+
 //1029追加
 let types={
     //int: new Class("int"),
@@ -102,7 +107,7 @@ let types={
 };  // 型の名前  → 実際の型(Class)オブジェクト
 // 1210宿題：intをdoubleのサブクラスにする．
 types.int=new Class("int");
-types.double=new Class("double");
+types.double=new Class("double",types.int);
 
 types.String=types.string;//1126宿題
 function nameToType(typeName) {//名前からClassオブジェクトを取得
@@ -175,9 +180,7 @@ const vdef={
         switch (node.op.text) {
         case "=":
         // 1112宿題 , 1210宿題(isAssignableFromをつかってすっきり書け)
-            if (lt===types.double && rt === types.int) {
-                node.exprType=types.double;
-            } else if (lt===rt) {
+            if (lt.isAssignableFrom(rt)) {
                 node.exprType=lt;
             } else {
                 console.log("= error", lt, rt);
@@ -284,7 +287,7 @@ const vdef={
             //  for i=0..N-1  (Nは引数の個数)
             //     仮引数[i] = 実引数[i] （仮引数[i]への実引数[i]の代入） ができるか
             for (let i=0;i<args.length;i++) {
-                if (args[i].exprType && args[i].exprType!==paramTypes[i]) {
+                if (args[i].exprType && paramTypes[i].isAssignableFrom(args[i].exprType)) {
                     console.log("typenotmatch",args[i].exprType, paramTypes[i]);
                     throw new Error((i+1)+"th arg/param type not match "+args[i].row+":"+args[i].col);
                 }
@@ -398,14 +401,16 @@ const vdef={
     }
 };
 const Semantics= {
-    check: function (node) {
+    check: function (node) {//node:プログラム全体のノード
         const v=Visitor(vdef);
         window.types=types;
         v.def=function (node) {
             if (node==null) console.log("Semantics.check.def","NULL");
             else console.log("Semantics.check.def",node.type, node);
         };
-        v.visit(node);
+        for (pass=1; pass<=2;pass++) {//冬休み課題[2]
+            v.visit(node);
+        }
     }
 };
 return Semantics;
