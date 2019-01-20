@@ -182,7 +182,7 @@ const vdef={
         switch (node.op.text) {
         case "=":
         // 1112宿題 , 1210宿題(isAssignableFromをつかってすっきり書け)
-            if (lt && lt.isAssignableFrom(rt)) {
+            if (lt && lt.isAssignableFrom(rt)) {//1210宿題
                 node.exprType=lt;
             } else {
                 console.log("= error", lt, rt);
@@ -290,6 +290,7 @@ const vdef={
             //     仮引数[i] = 実引数[i] （仮引数[i]への実引数[i]の代入） ができるか
             for (let i=0;i<args.length;i++) {
                 const atype=args[i].exprType, ptype=paramTypes[i];
+                //1210宿題
                 if (atype && ptype && !ptype.isAssignableFrom(atype)) {
                     console.log("typenotmatch",atype,"->",ptype);
                     throw_new_Error((i+1)+"th arg/param type not match "+args[i].row+":"+args[i].col);
