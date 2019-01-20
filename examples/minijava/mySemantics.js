@@ -80,6 +80,9 @@ class Class {
         this.methods[method.name]=method;
     }
 }
+class AnyClass extends Class {
+
+}
 class MapType {//写像   1119
     constructor(inputs , output  ) {
         // inputs を入力として output を返す写像を定義
@@ -106,8 +109,8 @@ let types={
     boolean: new Class("boolean"),//1126宿題
 };  // 型の名前  → 実際の型(Class)オブジェクト
 // 1210宿題：intをdoubleのサブクラスにする．
-types.int=new Class("int");
-types.double=new Class("double",types.int);
+types.double=new Class("double");
+types.int=new Class("int",types.double);//訂正1217
 
 types.String=types.string;//1126宿題
 function nameToType(typeName) {//名前からClassオブジェクトを取得
@@ -287,7 +290,8 @@ const vdef={
             //  for i=0..N-1  (Nは引数の個数)
             //     仮引数[i] = 実引数[i] （仮引数[i]への実引数[i]の代入） ができるか
             for (let i=0;i<args.length;i++) {
-                if (args[i].exprType && paramTypes[i].isAssignableFrom(args[i].exprType)) {
+                //訂正1217 ! を忘れていた
+                if (args[i].exprType && !paramTypes[i].isAssignableFrom(args[i].exprType)) {
                     console.log("typenotmatch",args[i].exprType, paramTypes[i]);
                     throw new Error((i+1)+"th arg/param type not match "+args[i].row+":"+args[i].col);
                 }
@@ -408,7 +412,7 @@ const Semantics= {
             if (node==null) console.log("Semantics.check.def","NULL");
             else console.log("Semantics.check.def",node.type, node);
         };
-        for (pass=1; pass<=2;pass++) {//冬休み課題[2]
+        for (pass=1; pass<=2; pass++) {//冬休み課題[2]
             v.visit(node);
         }
     }

@@ -91,7 +91,7 @@ define(["lang/Grammar"], function (Grammar) {
         exprStmt: [{expr:"expr"} , ";"],
         returnStmt: ["return",{expr:opt("expr")} , ";"],/*1119*/
         expr:  g.expr({
-            element: or("number","symbol", "literal","paren"),// 冬休み課題[3]
+            element: or("number","symbol", "literal"/*,"paren"*/),// 冬休み課題[3]
             operators: [// 優先順位(低い)
                 ["infixr", "="  ] , //  = 右結合２項演算子
                 ["infixl", or(">=","<=","==","!=",">","<")  ] , //  + -  左結合２項演算子
