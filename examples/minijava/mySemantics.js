@@ -95,18 +95,20 @@ let loopDepth=0;
 let curClass; // 今解析中のクラスオブジェクト
 let curMethod; // 今解析中のメソッドオブジェクト
 //1029追加
-let types={
-    //int: new Class("int"),
-    //double: new Class("double"),
-    void: new Class("void"),//1126宿題
-    string: new Class("string"),//1126宿題
-    boolean: new Class("boolean"),//1126宿題
-};  // 型の名前  → 実際の型(Class)オブジェクト
-// 1210宿題：intをdoubleのサブクラスにする．
-types.double=new Class("double");
-types.int=new Class("int",types.double);
-
-types.String=types.string;//1126宿題
+let types;
+function initTypes() {
+    types={
+        //int: new Class("int"),
+        //double: new Class("double"),
+        void: new Class("void"),//1126宿題
+        string: new Class("string"),//1126宿題
+        boolean: new Class("boolean"),//1126宿題
+    };  // 型の名前  → 実際の型(Class)オブジェクト
+    // 1210宿題：intをdoubleのサブクラスにする．
+    types.double=new Class("double");
+    types.int=new Class("int",types.double);
+    types.String=types.string;//1126宿題
+}
 function nameToType(typeName) {//名前からClassオブジェクトを取得
     const t=types[typeName];
     if (!t) throw_new_Error("Type "+typeName+" not defined");
@@ -416,11 +418,15 @@ const vdef={
         loopDepth++;
         this.visit(node.cond);
         if (node.cond.exprType!==types.boolean) {
-            throw_new_Error("Use boolean type as if condition "+node[0].row+":"+node[0].col);
+            throw_new_Error("Use boolean type as while condition "+node[0].row+":"+node[0].col);
         }
         this.visit(node.do);
         loopDepth--;
         //if (node.elsePart) this.visit(node.elsePart.else);
+    },
+    paren: function (node) {
+        this.visit(node.body);
+        node.exprType=node.body.exprType;
     },
     block: function (node) {//1126宿題
         for (const b of node.body) this.visit(b);
@@ -431,6 +437,7 @@ const vdef={
 };
 const Semantics= {
     check: function (node) {
+        initTypes();
         const v=Visitor(vdef);
         window.types=types;
         v.def=function (node) {
