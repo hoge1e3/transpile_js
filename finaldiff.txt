@@ -1,0 +1,329 @@
+- で始まる行：最終版に追加されたもの
++ で始まる行：最終版から削除されたもの
+
+diff --git a/examples/minijava/myCodeGen.js b/examples/minijava/myCodeGen.js
+index 2e9a67b..3d965e8 100644
+--- a/examples/minijava/myCodeGen.js
++++ b/examples/minijava/myCodeGen.js
+@@ -135,12 +135,6 @@ const vdef={
+     },
+     literal: function (node) {//1126宿題
+         this.printf("%s",node);
+-    },
+-    paren: function (node) {
+-        this.printf("(%v)",node.body);
+-    },
+-    breakStmt: function (node) {
+-        this.printf("break;%n");
+     }
+ 
+ };
+diff --git a/examples/minijava/myGrammar.js b/examples/minijava/myGrammar.js
+index f6e6cf5..3c3d535 100644
+--- a/examples/minijava/myGrammar.js
++++ b/examples/minijava/myGrammar.js
+@@ -1,6 +1,6 @@
+ ?// MINIJAVA
+ define(["lang/Grammar"], function (Grammar) {
+-    const spc=/^(\s|(\/\/.*\n))*/;
++    const spc=/^\s*/;    //冬休み課題 コメントを飛ばす
+     const tokenizer=new Grammar({space:spc});
+     const P=Grammar.P;
+     //トークンの定義
+@@ -8,13 +8,12 @@ define(["lang/Grammar"], function (Grammar) {
+         tokens: [{"this":tokenizer.rep0("token")}, /^\s*/ ,P.StringParser.eof],
+         token: tokenizer.or("new"/*1112*/,"if","while","return"/*1119*/,
+         "class","else","int","double","void"/*1126*/,"String"/*1126*/,"boolean"/*1126*/,
+-        "extends"/*1210*/,"break","symbol","number","literal"/*1126*/,
++        "extends"/*1210*/,"symbol","number","literal"/*1126*/,
+         "<<",">>>",">>",
+         "<=",">=","!=","==",">","<","!",
+         "(",")","{","}","+","-","=","*",";",".",",","/","&","^","|"),
+         literal: /^"[^"]*"/,/*1126*/
+         extends: "'extends",/*1210*/
+-        break: "'break",
+         if: "'if",
+         else: "'else",
+         while: "'while",
+@@ -83,8 +82,7 @@ define(["lang/Grammar"], function (Grammar) {
+         param: [{typeName:"typeName"},{name:"symbol"}],
+         typeName: or("int","double","void"/*1126*/,"boolean"/*1126*/,"String"/*1126*/,"symbol"),
+         stmt: or("exprStmt","localDecl","ctrlStmt","block","returnStmt"/*1119*/),
+-        ctrlStmt: or("ifStmt","whileStmt","breakStmt"),
+-        breakStmt: ["break",";"],
++        ctrlStmt: or("ifStmt","whileStmt"),
+         ifStmt: ["if","(",{cond:"expr"},")",{then:"stmt"},
+             {elsePart:opt("elsePart")}],
+         elsePart: ["else",{else:"stmt"}],
+@@ -93,7 +91,7 @@ define(["lang/Grammar"], function (Grammar) {
+         exprStmt: [{expr:"expr"} , ";"],
+         returnStmt: ["return",{expr:opt("expr")} , ";"],/*1119*/
+         expr:  g.expr({
+-            element: or("number","symbol", "literal","paren"),
++            element: or("number","symbol", "literal"/*,"paren"*/),// 冬休み課題[3]
+             operators: [// 優先順位(低い)
+                 ["infixr", "="  ] , //  = 右結合２項演算子
+                 ["infixl", or(">=","<=","==","!=",">","<")  ] , //  + -  左結合２項演算子
+@@ -109,13 +107,13 @@ define(["lang/Grammar"], function (Grammar) {
+                 // 優先順位(高い)
+             ]
+         }),
+-        "paren": ["(",{body:"expr"},")"],
++        //"paren":  冬休み課題[3]
+         "new": tk("new"),//1112
+         "args": ["(", {args:g.sep0("expr", "," )}  , ")"],
+         "memberRef": ["." , {name:"symbol"} ],
+         "number": tk("number"),
+         ";": tk(";"),"class":tk("class"),"extends":tk("extends"),/*1210*/
+-        "int":tk("int"),"double":tk("double"),"break":tk("break"),
++        "int":tk("int"),"double":tk("double"),
+         "String":tk("String"),"boolean":tk("boolean"),"void":tk("void"),/*1126*/
+         "literal": tk("literal"), /*1126*/
+         "return": tk("return"),/*1119*/
+diff --git a/examples/minijava/mySemantics.js b/examples/minijava/mySemantics.js
+index ec7f3c0..5e10aa6 100644
+--- a/examples/minijava/mySemantics.js
++++ b/examples/minijava/mySemantics.js
+@@ -6,7 +6,7 @@ class Field {
+     constructor(type, name) {
+         console.log("Field name=",name,"type=",type);
+         this.type=nameToType(type);//1029変更
+-        if (!this.type) throw_new_Error("Type "+type+" not defined");//1210
++        if (!this.type) throw new Error("Type "+type+" not defined");//1210
+         this.name=name;
+     }
+ }
+@@ -50,7 +50,6 @@ class Class {
+     }
+     isAssignableFrom(right) {//1210
+         // right:Class の値がこのクラスの変数に代入可能ならtrue
+-        if (!right) return true;
+         if (this===right) return true;
+         // right が thisの子クラスなら，true
+         return this.isSuperclassOf(right);
+@@ -80,6 +79,9 @@ class Class {
+     addMethod(method) {
+         this.methods[method.name]=method;
+     }
++}
++class AnyClass extends Class {
++
+ }
+ class MapType {//写像   1119
+     constructor(inputs , output  ) {
+@@ -90,32 +92,29 @@ class MapType {//写像   1119
+         this.output=output;
+     }
+ }
+-let pass;
+-let loopDepth=0;
++
+ let curClass; // 今解析中のクラスオブジェクト
+ let curMethod; // 今解析中のメソッドオブジェクト
++let pass; // 冬休み課題[2]  pass=1   エラーがあっても実際にはエラーを出さない
++//                         pass=2   エラーがあったらエラーを出す（従来通り）
++let loopDepth; // 冬休み課題[4] while に入ると1増えて，出ると1減る
++//                loopDepthが0のときにbreak があったらエラーを出す．
++
+ //1029追加
+-let types;
+-function initTypes() {
+-    types={
+-        //int: new Class("int"),
+-        //double: new Class("double"),
+-        void: new Class("void"),//1126宿題
+-        string: new Class("string"),//1126宿題
+-        boolean: new Class("boolean"),//1126宿題
+-    };  // 型の名前  → 実際の型(Class)オブジェクト
+-    // 1210宿題：intをdoubleのサブクラスにする．
+-    types.double=new Class("double");
+-    types.int=new Class("int",types.double);
+-    types.String=types.string;//1126宿題
+-}
++let types={
++    //int: new Class("int"),
++    //double: new Class("double"),
++    void: new Class("void"),//1126宿題
++    string: new Class("string"),//1126宿題
++    boolean: new Class("boolean"),//1126宿題
++};  // 型の名前  → 実際の型(Class)オブジェクト
++// 1210宿題：intをdoubleのサブクラスにする．
++types.double=new Class("double");
++types.int=new Class("int",types.double);//訂正1217
++
++types.String=types.string;//1126宿題
+ function nameToType(typeName) {//名前からClassオブジェクトを取得
+-    const t=types[typeName];
+-    if (!t) throw_new_Error("Type "+typeName+" not defined");
+-    return t;
+-}
+-function throw_new_Error(m) {
+-    if (pass==2) throw new Error(m);
++    return types[typeName];
+ }
+ //----
+ 
+@@ -168,7 +167,7 @@ const vdef={
+     localDecl: function (node) {
+         // 1022宿題: 現在のメソッドにローカル変数を追加
+         if (node.typeName.text==="void") {//1126宿題
+-            throw_new_Error("Cannot declare void variable "+node.typeName.row+":"+node.typeName.col);
++            throw new Error("Cannot declare void variable "+node.typeName.row+":"+node.typeName.col);
+         }
+         curMethod.locals[node.name]=new Local(node.typeName, node.name.text);
+     },
+@@ -184,11 +183,11 @@ const vdef={
+         switch (node.op.text) {
+         case "=":
+         // 1112宿題 , 1210宿題(isAssignableFromをつかってすっきり書け)
+-            if (lt && lt.isAssignableFrom(rt)) {//1210宿題
++            if (lt.isAssignableFrom(rt)) {
+                 node.exprType=lt;
+             } else {
+                 console.log("= error", lt, rt);
+-                throw_new_Error("Cannot use "+node.op.text+" in this type "+node.op.row+":"+node.op.col);
++                throw new Error("Cannot use "+node.op.text+" in this type "+node.op.row+":"+node.op.col);
+             }
+             break;
+         }
+@@ -207,7 +206,7 @@ const vdef={
+                 node.exprType=types.boolean;
+             } else {
+                 console.log("Cannot use "+node.op.text+" in ",lt,rt);
+-                throw_new_Error("Cannot use "+node.op.text+" in this type "+node.op.row+":"+node.op.col);
++                throw new Error("Cannot use "+node.op.text+" in this type "+node.op.row+":"+node.op.col);
+             }
+             break;
+         case "+":case "-":case "*":case "/":case "%":
+@@ -224,7 +223,7 @@ const vdef={
+                 node.exprType=types.string;
+             }else {
+                 console.log("Cannot use "+node.op.text+" in ",lt,rt);
+-                throw_new_Error("Cannot use "+node.op.text+" in this type "+node.op.row+":"+node.op.col);
++                throw new Error("Cannot use "+node.op.text+" in this type "+node.op.row+":"+node.op.col);
+             }
+             break;
+         case "^":case "&":case "|":case "<<":case ">>":case ">>>":
+@@ -232,7 +231,7 @@ const vdef={
+             if (lt===types.int && rt===types.int) {
+                 node.exprType=types.int;
+             }else {
+-                throw_new_Error("Cannot use "+node.op.text+" in this type "+node.op.row+":"+node.op.col);
++                throw new Error("Cannot use "+node.op.text+" in this type "+node.op.row+":"+node.op.col);
+             }
+             break;
+ 
+@@ -253,7 +252,7 @@ const vdef={
+             var m=leftType.getMethod(node.op.name);
+             var f=leftType.getField(node.op.name);
+             if (!m && !f) {//なければエラー
+-                throw_new_Error("Method or Field "+node.op.name+
++                throw new Error("Method or Field "+node.op.name+
+                 " not found in type "+leftType.name);
+             }
+             if (f) {//フィールドとして見つかった場合
+@@ -285,17 +284,16 @@ const vdef={
+             console.log("arg-check",leftType, node.op);
+             const paramTypes=leftType.inputs, args=node.op.args;
+             if (paramTypes.length!==args.length) {
+-                throw_new_Error("# of Arg/param not match  args="+node.op.args.length+" params="+leftType.inputs.length+ "row = "+node.op.args[0].row);
++                throw new Error("# of Arg/param not match  args="+node.op.args.length+" params="+leftType.inputs.length+ "row = "+node.op.args[0].row);
+             }
+             // TODO1203(2) それぞれの実引数と仮引数の型に互換性があるかチェック
+             //  for i=0..N-1  (Nは引数の個数)
+             //     仮引数[i] = 実引数[i] （仮引数[i]への実引数[i]の代入） ができるか
+             for (let i=0;i<args.length;i++) {
+-                const atype=args[i].exprType, ptype=paramTypes[i];
+-                //1210宿題
+-                if (atype && ptype && !ptype.isAssignableFrom(atype)) {
+-                    console.log("typenotmatch",atype,"->",ptype);
+-                    throw_new_Error((i+1)+"th arg/param type not match "+args[i].row+":"+args[i].col);
++                //訂正1217 ! を忘れていた
++                if (args[i].exprType && !paramTypes[i].isAssignableFrom(args[i].exprType)) {
++                    console.log("typenotmatch",args[i].exprType, paramTypes[i]);
++                    throw new Error((i+1)+"th arg/param type not match "+args[i].row+":"+args[i].col);
+                 }
+             }
+             node.exprType=leftType.output;
+@@ -312,7 +310,7 @@ const vdef={
+             this.visit(node.right.op);
+             node.exprType=nameToType(node.right.left.text);
+             if (!node.exprType) {
+-                throw_new_Error("Type "+node.right.left.text+" not found "+
++                throw new Error("Type "+node.right.left.text+" not found "+
+                 node.op.row+":"+node.op.col);
+             }
+             // 1119宿題：ここでもargsを辿る必要がある
+@@ -359,7 +357,7 @@ const vdef={
+             return;
+         }
+         if (!f && !m && !p && !l && !c)  {//change 1203
+-            throw_new_Error(node.text+" is not defined");
++            throw new Error(node.text+" is not defined");
+         }
+         if (p) {//  p==null やundefined以外
+             node.isParam=true;
+@@ -392,60 +390,29 @@ const vdef={
+     },
+     returnStmt: function (node) {
+         this.visit(node.expr);
+-        if (!node.expr && curMethod.returnType!==types.void) {
+-            throw_new_Error("return stmt should have return value");
+-            return;
+-        }
+-        if (node.expr && curMethod.returnType===types.void) {
+-            throw_new_Error("void cannot return value");
+-            return;
+-        }
+-        if (!curMethod.returnType.isAssignableFrom(node.expr.exprType)) {
+-            throw_new_Error("Return type not match");
+-        }
+     },
+     ifStmt: function (node) {//1126宿題
+         console.log("if",node);
+         this.visit(node.cond);
+         if (node.cond.exprType!==types.boolean) {
+-            throw_new_Error("Use boolean type as if condition "+node[0].row+":"+node[0].col);
++            throw new Error("Use boolean type as if condition "+node[0].row+":"+node[0].col);
+         }
+         this.visit(node.then);
+         if (node.elsePart) this.visit(node.elsePart.else);
+     },
+-    whileStmt: function (node) {
+-        console.log("whileStmt",node);
+-        loopDepth++;
+-        this.visit(node.cond);
+-        if (node.cond.exprType!==types.boolean) {
+-            throw_new_Error("Use boolean type as while condition "+node[0].row+":"+node[0].col);
+-        }
+-        this.visit(node.do);
+-        loopDepth--;
+-        //if (node.elsePart) this.visit(node.elsePart.else);
+-    },
+-    paren: function (node) {
+-        this.visit(node.body);
+-        node.exprType=node.body.exprType;
+-    },
+     block: function (node) {//1126宿題
+         for (const b of node.body) this.visit(b);
+-    },
+-    breakStmt: function (node) {
+-        if (loopDepth==0) throw_new_Error("use break in loop");
+     }
+ };
+ const Semantics= {
+-    check: function (node) {
+-        initTypes();
++    check: function (node) {//node:プログラム全体のノード
+         const v=Visitor(vdef);
+         window.types=types;
+         v.def=function (node) {
+             if (node==null) console.log("Semantics.check.def","NULL");
+             else console.log("Semantics.check.def",node.type, node);
+         };
+-        loopDepth=0;
+-        for (pass=1;pass<=2;pass++) {
++        for (pass=1; pass<=2; pass++) {//冬休み課題[2]
+             v.visit(node);
+         }
+     }
