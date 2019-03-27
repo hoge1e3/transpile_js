@@ -4,9 +4,14 @@ function (P,assert,EP) {
 //import assert from "../lib/assert.js";
 class Grammar {
     constructor(options) {
+        options=options||{};
         this.defs={};
-        if (options) {
-            if (options.space) this.space=this.toParser(options.space);
+        if (options.space) this.space=this.toParser(options.space);
+        if (options.tokenizer && options.tokenTypes) {
+            for (const tt of options.tokenTypes) {
+                const tk=P.TokensParser.token;
+                this.defs[tt]=tk(tt);
+            }
         }
     }
     def(defs) {

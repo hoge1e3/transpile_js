@@ -148,5 +148,5 @@ define(["lang/Grammar", "lang/Tokenizer"], function (Grammar,Tokenizer) {
     };
     g.def(gdef);
 
-    return {parser:g, tokenizer:tokenizer};
+    return {parser:g, tokenizer};
 });
