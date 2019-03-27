@@ -19,18 +19,18 @@ var $={
 Parser.SEP=$.SEP;
 $.dispTbl=function (tbl) {
 	var buf="";
-	var h={};
+	var h={},n;
 	if (!tbl) return buf;
 	for (var i in tbl) {// tbl:{char:Parser}   i:char
-		var n=tbl[i].name;
+		n=tbl[i].name;
 		if (!h[n]) h[n]="";
 		h[n]+=i;
 	}
-	for (var n in h) {
+	for (n in h) {
 		buf+=h[n]+"->"+n+",";
 	}
 	return buf;
-}
+};
 //var console={log:function (s) { $.consoleBuffer+=s; }};
 function _debug(s) {console.log(s);}
 function Parser(parseFunc){
@@ -53,7 +53,7 @@ function Parser(parseFunc){
 	} else {
 		this.parse=parseFunc;
 	}
-};
+}
 Parser.create=function(parseFunc) { // (State->State)->Parser
 	return new Parser(parseFunc);
 };
@@ -202,19 +202,19 @@ extend(Parser.prototype, {// class Parser
 		this.checkTbl();
 		other.checkTbl();
 		function mergeTbl() {
-		//   {except_ALL: contains_ALL}
+			//   {except_ALL: contains_ALL}
 			var t2=other._first.tbl;
 			//before tbl={ALL:a1, b:b1, c:c1}   t2={ALL:a2,c:c2,d:d2}
 			//       b1 conts a1  c1 conts a1     c2 conts a2   d2 conts a2
 			//after  tbl={ALL:a1|a2 , b:b1|a2    c:c1|c2    d:a1|d2 }
-			var keys={};
-			for (var k in tbl) { /*if (d) console.log("tbl.k="+k);*/ keys[k]=1;}
-			for (var k in t2)  { /*if (d) console.log("t2.k="+k);*/ keys[k]=1;}
+			var keys={},k;
+			for ( k in tbl) { /*if (d) console.log("tbl.k="+k);*/ keys[k]=1;}
+			for ( k in t2)  { /*if (d) console.log("t2.k="+k);*/ keys[k]=1;}
 			delete keys.ALL;
 			if (tbl.ALL || t2.ALL) {
 				tbl.ALL=or(tbl.ALL, t2.ALL);
 			}
-			for (var k in keys ) {
+			for ( k in keys ) {
 				//if (d) console.log("k="+k);
 				//if (tbl[k] && !tbl[k].parse) throw "tbl["+k+"] = "+tbl[k];
 				//if (t2[k] && !t2[k].parse) throw "t2["+k+"] = "+tbl[k];
@@ -362,7 +362,7 @@ extend(Parser.prototype, {// class Parser
 	retN: function (i) {
 		return this.ret(function () {
 			return arguments[i];
-		})
+		});
 	},
 	parseStr: function (str,global) {
 		var st=new State(str,global);
@@ -397,7 +397,7 @@ function State(strOrTokens, global) { // class State
 		this.result=[];
 		this.success=true;
 	}
-};
+}
 extend(State.prototype, {
 	clone: function() {
 		var s=new State();

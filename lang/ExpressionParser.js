@@ -1,6 +1,6 @@
 define(["lang/Parser"], function (Parser) {
 // parser.js の補助ライブラリ．式の解析を担当する
-return ExpressionParser=function () {
+const ExpressionParser=function () {
 	var $={};
 	var EXPSTAT="EXPSTAT";
 	//  first 10     *  +  <>  &&  ||  =     0  later
@@ -9,7 +9,7 @@ return ExpressionParser=function () {
 		$.eq=function (o) {return type==o.type() && prio==o.prio(); };
 		$.type=function (t) { if (!t) return type; else return t==type;};
 		$.prio=function () {return prio;};
-		$.toString=function () {return "["+type+":"+prio+"]"; }
+		$.toString=function () {return "["+type+":"+prio+"]"; };
 		return $;
 	}
 	function composite(a) {
@@ -80,7 +80,7 @@ return ExpressionParser=function () {
 	};
 	$.mkInfix.def=function (left,op,right) {
 		return Parser.setRange({type:"infix", op:op, left: left, right: right});
-	}
+	};
 	$.mkInfixl=function (f) {
 		$.mkInfixl.def=f;
 	};
@@ -121,12 +121,12 @@ return ExpressionParser=function () {
 	};
 	function dump(st, lbl) {
 		return ;
-		var s=st.src.str;
+		/*var s=st.src.str;
 		console.log("["+lbl+"] "+s.substring(0,st.pos)+"^"+s.substring(st.pos)+
-				" opType="+ st.opType+"  Succ = "+st.isSuccess()+" res="+st.result[0]);
+				" opType="+ st.opType+"  Succ = "+st.isSuccess()+" res="+st.result[0]);*/
 	}
 	function parse(minPrio, st) {
-		var stat=0, res=st ,  opt;
+		var stat=0, res=st, opt, pex, inf;
 		dump(st," start minprio= "+minPrio);
 		st=prefixOrElement.parse(st);
 		dump(st," prefixorelem "+minPrio);
@@ -143,7 +143,7 @@ return ExpressionParser=function () {
 				return st;
 			}
 				// st: Expr    st.pos = -elem^
-			var pex=$.mkPrefix.def(pre, st.result[0]);
+			pex=$.mkPrefix.def(pre, st.result[0]);
 			res=st.clone();  //  res:Expr
 			res.result=[pex]; // res:prefixExpr  res.pos= -elem^
 			if (!st.nextPostfixOrInfix) {
@@ -170,7 +170,7 @@ return ExpressionParser=function () {
 			// assert st:postfixOrInfix  res:Expr
 			if (opt.type("postfix")) {
 				// st:postfix
-				var pex=$.mkPostfix.def(res.result[0],st.result[0]);
+				pex=$.mkPostfix.def(res.result[0],st.result[0]);
 				res=st.clone();
 				res.result=[pex]; // res.pos= expr++^
 				dump(st, "185");
@@ -180,13 +180,13 @@ return ExpressionParser=function () {
 				}
 			} else if (opt.type("infixl")){  //x+y+z
 				// st: infixl
-				var inf=st.result[0];
+				inf=st.result[0];
 				st=parse(opt.prio()+1, st);
 				if (!st.isSuccess()) {
 					return res;
 				}
 				// st: expr   st.pos=  expr+expr^
-				var pex=$.mkInfixl.def(res.result[0], inf , st.result[0]);
+				pex=$.mkInfixl.def(res.result[0], inf , st.result[0]);
 				res=st.clone();
 				res.result=[pex]; //res:infixlExpr
 				if (!st.nextPostfixOrInfix) {
@@ -195,13 +195,13 @@ return ExpressionParser=function () {
 				st=st.nextPostfixOrInfix;
 			} else if (opt.type("infixr")) { //a=^b=c
 				// st: infixr
-				var inf=st.result[0];
+				inf=st.result[0];
 				st=parse(opt.prio() ,st);
 				if (!st.isSuccess()) {
 					return res;
 				}
 				// st: expr   st.pos=  a=b=c^
-				var pex=$.mkInfixr.def(res.result[0], inf , st.result[0]);
+				pex=$.mkInfixr.def(res.result[0], inf , st.result[0]);
 				res=st.clone();
 				res.result=[pex]; //res:infixrExpr
 				if (!st.nextPostfixOrInfix) {
@@ -218,7 +218,7 @@ return ExpressionParser=function () {
 				}
 				// st= expr   st.pos=  left?mid^:right
 				var mid=st.result[0];
-				var st=trifixes[opt.prio()].parse(st);
+				st=trifixes[opt.prio()].parse(st);
 				// st= :      st.pos= left?mid:^right;
 				if (!st.isSuccess()) {
 					return res;
@@ -230,7 +230,7 @@ return ExpressionParser=function () {
 				}
 				var right=st.result[0];
 				// st=right      st.pos= left?mid:right^;
-				var pex=$.mkTrifixr.def(left, inf1 , mid, inf2, right);
+				pex=$.mkTrifixr.def(left, inf1 , mid, inf2, right);
 				res=st.clone();
 				res.result=[pex]; //res:infixrExpr
 				if (!st.nextPostfixOrInfix) {
@@ -239,13 +239,13 @@ return ExpressionParser=function () {
 				st=st.nextPostfixOrInfix;
 			} else { // infix
 				// st: infixl
-				var inf=st.result[0];
+				inf=st.result[0];
 				st=parse(opt.prio()+1 ,st);
 				if (!st.isSuccess()) {
 					return res;
 				}
 				// st: expr   st.pos=  expr+expr^
-				var pex=$.mkInfix.def(res.result[0], inf , st.result[0]);
+				pex=$.mkInfix.def(res.result[0], inf , st.result[0]);
 				res=st.clone();
 				res.result=[pex]; //res:infixExpr
 				if (!st.nextPostfixOrInfix) {
@@ -267,5 +267,5 @@ return ExpressionParser=function () {
 	};
 	return $;
 };
-
+return ExpressionParser;
 });

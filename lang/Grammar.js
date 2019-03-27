@@ -13,17 +13,20 @@ class Grammar {
         if (defs.$space) {
             this.space=this.toParser(defs.$space);
         }
-        for (let k in defs) {
-            let v=defs[k];
+        const proc=k=>{
+            const v=defs[k];
             if (k==="$space") {
                 //this.space=this.toParser(v);
             } else {
-                this.defs[k]=this.toParser(v).ret((r)=>{
+                const p=this.toParser(v);
+                this.defs[k]=p.ret((r)=>{
                     if (r && typeof r==="object" && !r.type) r.type=k;
                     return r;
                 });
+                if (p.names) this.defs[k].names=p.names;
             }
-        }
+        };
+        for (let k in defs) proc(k);
     }
     expr(defs) {
         const elem=defs.element;
@@ -84,7 +87,7 @@ class Grammar {
                 if (e.constructor===Object) {
                     const tnames=[];
                     for (let k in e) {
-                        tnames.push(k)
+                        tnames.push(k);
                     }
                     assert(tnames.length===1,"Invalid expr ",expr);
                     assert(tnames[0]!=="type", "Cannot use the name 'type' as an attribute name", expr);
@@ -113,7 +116,7 @@ class Grammar {
         }
         assert.fail("Invalid expr",expr);
     }
-};
+}
 //const testf=(...{a,b})=>a+b;
 const methods=["opt","rep0","rep1","sep0","sep1","except"];
 const p=Grammar.prototype;
