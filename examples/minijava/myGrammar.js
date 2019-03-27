@@ -1,8 +1,19 @@
 ﻿// MINIJAVA
-define(["lang/Grammar"], function (Grammar) {
+define(["lang/Grammar", "lang/Tokenizer"], function (Grammar,Tokenizer) {
     const spc=/^\s*/;    //冬休み課題 コメントを飛ばす
     const tokenizer=new Grammar({space:spc});
     const P=Grammar.P;
+    const t=new Tokenizer({
+        space:spc,
+        order:["a","b","sym","num"],
+        defs: {
+            sym: /^[a-z]+/,
+            num: /^[0-9]+/
+        }
+    });
+    window.t=t;
+    console.log(t.tokenize("a b hoge aa bb 123 555"));
+
     //トークンの定義
     const tdef={
         tokens: [{"this":tokenizer.rep0("token")}, /^\s*/ ,P.StringParser.eof],
@@ -57,7 +68,7 @@ define(["lang/Grammar"], function (Grammar) {
     tokenizer.def(tdef);
 
 
-    const g=new Grammar;
+    const g=new Grammar();
     const rep0=g.rep0;
     const rep1=g.rep1;
     const sep0=g.sep0;
