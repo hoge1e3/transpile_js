@@ -6,7 +6,7 @@ window.run=()=>{
     let src=document.forms.prog.text.value;
     if (!src.match(/\n$/)) src+="\n";
     localStorage.lastSrc=src;
-    const tres=myGrammar.tokenizer.get("tokens").parseStr(src);
+    const tres=myGrammar.tokenizer.tokenize(src);//get("tokens").parseStr(src);
     if (!tres.success) {
         alert("Token error! at "+ tres.src.maxRow+":"+tres.src.maxCol);
         return;

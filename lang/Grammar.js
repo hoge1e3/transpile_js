@@ -7,8 +7,8 @@ class Grammar {
         options=options||{};
         this.defs={};
         if (options.space) this.space=this.toParser(options.space);
-        if (options.tokenizer && options.tokenTypes) {
-            for (const tt of options.tokenTypes) {
+        if (options.tokenizer && options.tokenizer.tokenTypes) {
+            for (const tt of options.tokenizer.tokenTypes) {
                 const tk=P.TokensParser.token;
                 this.defs[tt]=tk(tt);
             }

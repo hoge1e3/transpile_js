@@ -1,74 +1,29 @@
 ﻿// MINIJAVA
 define(["lang/Grammar", "lang/Tokenizer"], function (Grammar,Tokenizer) {
     const spc=/^\s*/;    //冬休み課題 コメントを飛ばす
-    const tokenizer=new Grammar({space:spc});
+    //const tokenizer=new Grammar({space:spc});
     const P=Grammar.P;
-    const t=new Tokenizer({
+    const tokenizer=new Tokenizer({
         space:spc,
-        order:["a","b","sym","num"],
+        order:[
+            "new"/*1112*/,"if","while","return"/*1119*/,
+            "class","else","int","double","void"/*1126*/,"String"/*1126*/,"boolean"/*1126*/,
+            "extends"/*1210*/,"symbol","number","literal"/*1126*/,
+            "<<",">>>",">>",
+            "<=",">=","!=","==",">","<","!",
+            "(",")","{","}","+","-","=","*",";",".",",","/","&","^","|"
+        ],
         defs: {
-            sym: /^[a-z]+/,
-            num: /^[0-9]+/
+            literal: /^"[^"]*"/,/*1126*/
+            num: /^[0-9]+/,
+            symbol: /^[a-zA-Z_$][a-zA-Z_$0-9]*/,
+            number: /^(([0-9]+\.[0-9]+)|(\.[0-9]+)|([0-9]+\.)|([0-9]+))/
         }
     });
-    window.t=t;
-    console.log(t.tokenize("a b hoge aa bb 123 555"));
+    //window.t=t;
+    //console.log(t.tokenize("a b hoge aa bb 123 555"));
 
-    //トークンの定義
-    const tdef={
-        tokens: [{"this":tokenizer.rep0("token")}, /^\s*/ ,P.StringParser.eof],
-        token: tokenizer.or("new"/*1112*/,"if","while","return"/*1119*/,
-        "class","else","int","double","void"/*1126*/,"String"/*1126*/,"boolean"/*1126*/,
-        "extends"/*1210*/,"symbol","number","literal"/*1126*/,
-        "<<",">>>",">>",
-        "<=",">=","!=","==",">","<","!",
-        "(",")","{","}","+","-","=","*",";",".",",","/","&","^","|"),
-        literal: /^"[^"]*"/,/*1126*/
-        extends: "'extends",/*1210*/
-        if: "'if",
-        else: "'else",
-        while: "'while",
-        class: "'class",
-        int: "'int",
-        double: "'double",
-        void: "'void",  /*1126*/
-        String: "'String",/*1126*/
-        boolean: "'boolean",/*1126*/
-        new: "'new",//1112
-        return: "'return",/*1119*/
-        symbol: /^[a-zA-Z_$][a-zA-Z_$0-9]*/,
-        //number: /^[+-]?(([0-9]+\.[0-9]+)|([0-9]+))/,
-        number: /^(([0-9]+\.[0-9]+)|(\.[0-9]+)|([0-9]+\.)|([0-9]+))/,
-        "{": "'{",
-        "}": "'}",
-        "(": "'(",
-        ")": "')",
-        ";": "';",
-        ",": "',",
-        "/": "'/",
-        "+": "'+",
-        "-": "'-",
-        "!": "'!",
-        "*": "'*",
-        "=": "'=",
-        ".": "'.",
-        "<=":"'<=",
-        ">=":"'>=",
-        "!=":"'!=",
-        "==":"'==",
-        ">":"'>",
-        "<":"'<",
-        "<<":"'<<",
-        ">>":"'>>",
-        ">>>":"'>>>",
-        "&":"'&",
-        "|":"'|",
-        "^":"'^",
-    };
-    tokenizer.def(tdef);
-
-
-    const g=new Grammar();
+    const g=new Grammar({tokenizer});
     const rep0=g.rep0;
     const rep1=g.rep1;
     const sep0=g.sep0;
@@ -76,7 +31,7 @@ define(["lang/Grammar", "lang/Tokenizer"], function (Grammar,Tokenizer) {
     const opt=g.opt;
     const or=g.or;
     const br=/^\r?\n/;
-    const tk=P.TokensParser.token;
+    //const tk=P.TokensParser.token;
     //構文の定義
     const gdef={
         program: [{body:rep0("classDef")},P.TokensParser.eof],
@@ -119,32 +74,8 @@ define(["lang/Grammar", "lang/Tokenizer"], function (Grammar,Tokenizer) {
             ]
         }),
         //"paren":  冬休み課題[3]
-        "new": tk("new"),//1112
         "args": ["(", {args:g.sep0("expr", "," )}  , ")"],
-        "memberRef": ["." , {name:"symbol"} ],
-        "number": tk("number"),
-        ";": tk(";"),"class":tk("class"),"extends":tk("extends"),/*1210*/
-        "int":tk("int"),"double":tk("double"),
-        "String":tk("String"),"boolean":tk("boolean"),"void":tk("void"),/*1126*/
-        "literal": tk("literal"), /*1126*/
-        "return": tk("return"),/*1119*/
-        "{": tk("{"), "}":tk("}"),"(": tk("("), ")":tk(")"),
-        "=": tk("="),  "+": tk("+"), "-": tk("-"),  "*": tk("*"), "/":tk("/"), ",":tk(","),
-        ".": tk("."), "if":tk("if"),"while":tk("while"),"else":tk("else"),
-        "==": tk("=="),
-        "!=": tk("!="),
-        "!": tk("!"),
-        ">=": tk(">="),
-        "<=": tk("<="),
-        ">": tk(">"),
-        "<": tk("<"),
-        ">>": tk(">>"),
-        "<<": tk("<<"),
-        ">>>": tk(">>>"),
-        "^": tk("^"),
-        "&": tk("&"),
-        "|": tk("|"),
-        symbol: tk("symbol")
+        "memberRef": ["." , {name:"symbol"} ]
     };
     g.def(gdef);
 
