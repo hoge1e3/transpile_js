@@ -10,12 +10,12 @@ class Visitor {
 			if ($.debug) console.log("visit ",node.type, node.pos);
 			var v=(node ? $[$.methodName(node.type)] :null);
 			if (v) return v.call($, node);
-			return $.visitDefault.call($,node);
+			return $.default.call($,node);
 		} finally {
 			$.path.pop();
 		}
     }
-    visitDefault(){}
+    default(){}
     methodName(type) {
         return "visit"+this.capitalize(type);
     }

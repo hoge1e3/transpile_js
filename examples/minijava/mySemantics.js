@@ -1,5 +1,5 @@
 // MINIJAVA
-define (["lang/Visitor"],
+define (["lang/Visitor2"],
 function (Visitor) {
 
 class Field {
@@ -118,13 +118,13 @@ function nameToType(typeName) {//名前からClassオブジェクトを取得
 }
 //----
 
-const vdef={
-    program: function (node) {
+class MyVisitor extends Visitor {
+    visitProgram(node) {
         for (const b of node.body) {
             this.visit(b);
         }
-    },
-    classDef: function (node) {
+    }
+    visitClassDef(node) {
         const
             fields=node.members.
                 filter((member)=>member.type==="fieldDecl"),
@@ -155,26 +155,26 @@ const vdef={
             this.visit(m);
         }
         console.log("curClass", curClass);
-    },
-    methodDef: function (node) {
+    }
+    visitMethodDef (node) {
         curMethod = curClass.getMethod(node.name.text);
         console.log("methodDef",node,curMethod);
         // curClass.addMethod()
         for (const b of node.body) {
             this.visit(b);
         }
-    },
-    localDecl: function (node) {
+    }
+    visitLocalDecl (node) {
         // 1022宿題: 現在のメソッドにローカル変数を追加
         if (node.typeName.text==="void") {//1126宿題
             throw new Error("Cannot declare void variable "+node.typeName.row+":"+node.typeName.col);
         }
         curMethod.locals[node.name]=new Local(node.typeName, node.name.text);
-    },
-    exprStmt: function (node) {
+    }
+    visitExprStmt (node) {
         this.visit(node.expr);
-    },
-    infixr: function(node) {
+    }
+    visitInfixr (node) {
         // node.left node.op node.right
         console.log("infixr",node);
         this.visit(node.left);
@@ -191,8 +191,8 @@ const vdef={
             }
             break;
         }
-    },
-    infixl: function(node) {
+    }
+    visitInfixl(node) {
         // node.left node.op node.right
         this.visit(node.left);
         this.visit(node.right);
@@ -236,8 +236,8 @@ const vdef={
             break;
 
         }
-    },
-    postfix: function (node) {
+    }
+    visitPostfix(node) {
         // node.left node.op
         this.visit(node.left);
         // 1029追加
@@ -299,8 +299,8 @@ const vdef={
             node.exprType=leftType.output;
         }
         //----
-    },
-    prefix: function (node) {
+    }
+    visitPrefix(node) {
         // node.op node.right
         console.log("prefix", node);
         /*if (node.op.type==="new") {//1112 //del 1203
@@ -319,31 +319,31 @@ const vdef={
             this.visit(node.right);
             node.exprType=node.right.exprType;//add 1203
         //}
-    },
-    args: function (node) {
+    }
+    visitArgs(node) {
         // node.arg
         for (var arg of node.args) {
             this.visit(arg);
         }
-    },
-    memberRef: function (node) {
+    }
+    visitMemberRef(node) {
         // node.name
-    },
-    "number": function (node) {
+    }
+    visitNumber(node) {
         // 1112宿題
         if (node.text.indexOf(".")>=0) node.exprType=types.double;
         else node.exprType=types.int;
-    },
-    literal : function (node) {//1126宿題
+    }
+    visitLiteral(node) {//1126宿題
         node.exprType=types.string;
-    },
-    fieldDecl: function (node) {
+    }
+    visitFieldDecl (node) {
         //node.name
         console.log("fieldDecl",node, node.name.text);
         let field=new Field(node.typeName, node.name.text);
         curClass.addField(field);
-    },
-    symbol: function (node) {
+    }
+    visitSymbol (node) {
         //console.log("symbol",node, node.text);
         // 存在しないフィールドにアクセスしようとしたら
         // エラー（例外）を投げる
@@ -387,11 +387,11 @@ const vdef={
             }
             node.exprType=new MapType(paramTypes, c);
         }
-    },
-    returnStmt: function (node) {
+    }
+    visitReturnStmt(node) {
         this.visit(node.expr);
-    },
-    ifStmt: function (node) {//1126宿題
+    }
+    visitIfStmt(node) {//1126宿題
         console.log("if",node);
         this.visit(node.cond);
         if (node.cond.exprType!==types.boolean) {
@@ -399,19 +399,19 @@ const vdef={
         }
         this.visit(node.then);
         if (node.elsePart) this.visit(node.elsePart.else);
-    },
-    block: function (node) {//1126宿題
+    }
+    visitBlock (node) {//1126宿題
         for (const b of node.body) this.visit(b);
     }
-};
+    default(node) {
+        if (node==null) console.log("Semantics.check.def","NULL");
+        else console.log("Semantics.check.def",node.type, node);
+    }
+}
 const Semantics= {
     check: function (node) {//node:プログラム全体のノード
-        const v=Visitor(vdef);
+        const v=new MyVisitor();
         window.types=types;
-        v.def=function (node) {
-            if (node==null) console.log("Semantics.check.def","NULL");
-            else console.log("Semantics.check.def",node.type, node);
-        };
         for (pass=1; pass<=2; pass++) {//冬休み課題[2]
             v.visit(node);
         }
