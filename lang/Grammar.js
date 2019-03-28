@@ -1,37 +1,40 @@
-define(["lang/Parser","lib/assert","lang/ExpressionParser"],
-function (P,assert,EP) {
-//import P from "./Parser.js";
-//import assert from "../lib/assert.js";
+define(function (require,exports,module) {//----
+const P=require("./Parser");
+const assert=require("../lib/assert");
+const EP=require("./ExpressionParser");
+const NodeTypes=require("./NodeTypes");
 class Grammar {
     constructor(options) {
         options=options||{};
         this.defs={};
+        this.nodeTypes={};
         if (options.space) this.space=this.toParser(options.space);
         if (options.tokenizer && options.tokenizer.tokenTypes) {
             for (const tt of options.tokenizer.tokenTypes) {
                 const tk=P.TokensParser.token;
                 this.defs[tt]=tk(tt);
+                this.defs[tt].nodeType=new NodeTypes.Token();
+                this.defs[tt].nodeType.name=tt;
             }
         }
     }
-    def(defs) {
-        if (defs.$space) {
-            this.space=this.toParser(defs.$space);
+    def(exprs) {
+        if (exprs.$space) {
+            this.space=this.toParser(exprs.$space);
         }
-        const proc=k=>{
-            const v=defs[k];
-            if (k==="$space") {
-                //this.space=this.toParser(v);
-            } else {
-                const p=this.toParser(v);
-                this.defs[k]=p.ret((r)=>{
-                    if (r && typeof r==="object" && !r.type) r.type=k;
-                    return r;
-                });
-                if (p.names) this.defs[k].names=p.names;
-            }
+        const proc=name=>{
+            if (name==="$space") return;
+            const p=this.toParser(exprs[name]);
+            const pr=p.ret(r=>{
+                if (r && typeof r==="object" && !r.type) r.type=name;
+                return r;
+            });
+            pr.nodeType=p.nodeType;
+            if (pr.nodeType) pr.nodeType.name=name;
+            if (p.names) pr.names=p.names;
+            this.defs[name]=pr;
         };
-        for (let k in defs) proc(k);
+        for (let k in exprs) proc(k);
     }
     expr(defs) {
         const elem=defs.element;
@@ -66,40 +69,56 @@ class Grammar {
         return e.build();
     }
     get(name) {
-        return this.defs[name] || P.lazy(()=>{
+        const res=this.defs[name];
+        if (res) return res;
+        const lz=P.lazy(()=>{
             const r=this.defs[name];
             if (!r) throw new Error(`Undefined grammar ${name}`);
             return r;
         });
+        lz.nodeType=new NodeTypes.Lazy(()=>{
+            const r=this.defs[name];
+            if (!r) throw new Error(`Undefined grammar ${name}`);
+            return r.nodeType;
+        });
+        lz.nodeType.name=name;
+        return lz;
     }
     toParser(expr) {
+        const tokenify=r=>{
+            const r2=(this.space) ? this.space.and(r).ret((s,b)=>b) : r ;
+            r2.nodeType=new NodeTypes.Token();
+            return r2;
+        };
         if (expr instanceof P.Parser) return expr;
         if (typeof expr==="string") {
             if (expr.match(/^'/)) {
                 const r=P.StringParser.str(expr.substring(1));
-                if (this.space) return this.space.and(r).ret((s,b)=>b);
-                return r;
+                return tokenify(r);
             }
             return this.get(expr);
         } else if (expr instanceof RegExp) {
-            let r=P.StringParser.reg(expr);
-            if (this.space) return this.space.and(r).ret((s,b)=>b);
-            return r;
+            const r=P.StringParser.reg(expr);
+            return tokenify(r);
         } else if (expr instanceof Array) {
             let p;
+            const struct=new NodeTypes.Struct();
             const names=[];
             for (let e of expr) {
+                let name;
                 if (e.constructor===Object) {
                     const tnames=[];
                     for (let k in e) {
                         tnames.push(k);
                     }
                     assert(tnames.length===1,"Invalid expr ",expr);
-                    assert(tnames[0]!=="type", "Cannot use the name 'type' as an attribute name", expr);
-                    names.push(tnames[0]);
-                    e=e[tnames[0]];
+                    name=tnames[0];
+                    assert(name!=="type", "Cannot use the name 'type' as an attribute name", expr);
+                    names.push(name);
+                    e=e[name];
                 } else names.push(null);
                 e=this.toParser(e);
+                if (name) struct.addMember(name, e.nodeType);
                 if (!p) p=e;
                 else p=p.and(e);
             }
@@ -117,6 +136,7 @@ class Grammar {
                 }
                 return r;
             });
+            p.nodeType=struct;
             return p;
         }
         assert.fail("Invalid expr",expr);
@@ -132,8 +152,18 @@ for (const m of methods) {
             const g=this;
             return (...args)=>{
                 const a=args.map(g.toParser.bind(g));
-                const head=a.shift();
-                return head[m](...a);
+                const parser=a.shift();
+                const res=parser[m](...a);
+                const nodeType=parser.nodeType;
+                if (nodeType) {
+                    switch (m) {
+                        case "opt":res.nodeType=new NodeTypes.Opt(nodeType);break;
+                        case "except":res.nodeType=nodeType;break;
+                        default:
+                        res.nodeType=new NodeTypes.Array(nodeType);
+                    }
+                }
+                return res;
             };
         }
     });
@@ -145,15 +175,24 @@ for (const m of chainMethods) {
             const g=this;
             return (...args)=>{
                 const a=args.map(g.toParser.bind(g));
+                let nodeType;
+                if (m==="or") {
+                    nodeType=new NodeTypes.Or();
+                    for (const e of a) {
+                        if (e.nodeType) nodeType.addCandidate(e.nodeType);
+                    }
+                }
                 let head=a.shift();
                 while(a.length>0) {
                     head=head[m](a.shift());
+                }
+                if (nodeType) {
+                    head.nodeType=nodeType;
                 }
                 return head;
             };
         }
     });
 }
-return Grammar;
-//export default Grammar;
-});
+module.exports=Grammar;
+});//----end of define

@@ -78,6 +78,6 @@ define(["lang/Grammar", "lang/Tokenizer"], function (Grammar,Tokenizer) {
         "memberRef": ["." , {name:"symbol"} ]
     };
     g.def(gdef);
-
+    console.log("G",g);
     return {parser:g, tokenizer};
 });
