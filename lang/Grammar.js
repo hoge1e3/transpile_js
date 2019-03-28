@@ -134,6 +134,7 @@ class Grammar {
                         if (names[i]) r[names[i]]=results[i];
                     }
                 }
+                r.subnodes=results;
                 return r;
             });
             p.nodeType=struct;
