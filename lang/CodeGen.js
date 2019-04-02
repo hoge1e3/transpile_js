@@ -1,4 +1,4 @@
-define(["lib/assert","source-map","lang/Pos2RC"],function (A, S, Pos2RC) {
+define(["../lib/assert","./source-map","./Pos2RC"],function (A, S, Pos2RC) {
 //	console.log(A,S,Pos2RC);
 //S=sourceMap;
 

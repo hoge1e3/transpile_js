@@ -1,5 +1,5 @@
 // MINIJAVA
-define (["lang/Visitor","lang/CodeGen"],
+define (["../../lang/Visitor","../../lang/CodeGen"],
 function (Visitor, CodeGen) {
 
 const vdef={

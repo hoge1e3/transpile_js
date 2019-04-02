@@ -1,4 +1,4 @@
-define(["lang/Parser","lang/Grammar"],function (P, Grammar) {
+define(["./Parser","./Grammar"],function (P, Grammar) {
     class Tokenizer {
         constructor({order,defs,space}) {
             this.g=new Grammar({space});

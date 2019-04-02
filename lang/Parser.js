@@ -1,4 +1,4 @@
-define(["lang/Pos2RC"], function (Pos2RC) {
+define(["./Pos2RC"], function (Pos2RC) {
 //import Pos2RC from "./Pos2RC.js";
 function extend(dst, src) {
 	var i;

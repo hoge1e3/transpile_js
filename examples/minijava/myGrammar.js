@@ -1,5 +1,5 @@
 ﻿// MINIJAVA
-define(["lang/Grammar", "lang/Tokenizer"], function (Grammar,Tokenizer) {
+define(["../../lang/Grammar", "../../lang/Tokenizer"], function (Grammar,Tokenizer) {
     const spc=/^\s*/;    //冬休み課題 コメントを飛ばす
     //const tokenizer=new Grammar({space:spc});
     const P=Grammar.P;

@@ -1,5 +1,5 @@
 // MINIJAVA
-define (["lang/Visitor2"],
+define (["../../lang/Visitor2"],
 function (Visitor) {
 
 class Field {
