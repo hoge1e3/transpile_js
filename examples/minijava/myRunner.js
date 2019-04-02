@@ -1,7 +1,8 @@
 // MINIJAVA
 requirejs(["minijava/myGrammar","minijava/myCodeGen",
-"minijava/mySemantics"],
-function (myGrammar, myCodeGen, mySemantics) {
+"minijava/mySemantics","lang/VisitorTmpl"],
+function (myGrammar, myCodeGen, mySemantics,VisitorTmpl) {
+    VisitorTmpl.genVisitor(myGrammar.parser);
 window.run=()=>{
     let src=document.forms.prog.text.value;
     if (!src.match(/\n$/)) src+="\n";
@@ -15,7 +16,6 @@ window.run=()=>{
     console.log("tokenres",tokens.map(
         (e)=>e.type+" "+e.pos+" "+src.substring(e.pos,e.pos+e.len)
     ));
-
     const r=
         myGrammar.parser.get("program").parseTokens(tokens);
     if (!r.success) {
