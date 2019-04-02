@@ -1,6 +1,7 @@
 // MINIJAVA
-define (["../../lang/Visitor","../../lang/CodeGen"],
-function (Visitor, CodeGen) {
+define(function (require,exports,module) {
+const Visitor=require("../../lang/Visitor");
+const CodeGen=require("../../lang/CodeGen");
 
 const vdef={
     program: function (node) {

@@ -1,4 +1,6 @@
-define(["./Parser","./Grammar"],function (P, Grammar) {
+define(function (require,exports,module) {
+    const P=require("./Parser");
+    const Grammar=require("./Grammar");
     class Tokenizer {
         constructor({order,defs,space}) {
             this.g=new Grammar({space});
