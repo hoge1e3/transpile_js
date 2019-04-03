@@ -71,6 +71,7 @@ const vdef={
         this.visit(node.op);
         this.visit(node.right);
         this.printf(")");
+        //this.printf("/*%s*/",node.prio);
     },
     infixl: function(node) {
         // node.left node.op node.right
@@ -79,11 +80,14 @@ const vdef={
         this.visit(node.op);
         this.visit(node.right);
         this.printf(")");
+        //this.printf("/*%s*/",node.prio);
     },
     postfix: function (node) {
         this.printf("%v%v",node.left,node.op);
+        //this.printf("/*%s*/",node.prio);
     },
     prefix: function (node) {
+        //this.printf("/*%s*/",node.prio);
         if (node.op.type==="new") {//1112 -> mod 1203
             //  new XXXX();
             this.visit(node.right);
