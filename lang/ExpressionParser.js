@@ -53,6 +53,15 @@ const ExpressionParser=function () {
 		element.add(e);
 	};
 	$.getElement=function () {return element.get();};
+	$._prioToNodeType=[];
+	$.prioToNodeType=function (prio,name,Class) {
+		if (arguments.length===1) return $._prioToNodeType[prio];
+		$._prioToNodeType[prio]={name,Class};
+	};
+	$.prioToNodeTypeName=function (prio) {
+		const r=$.prioToNodeType(prio);
+		return r&&r.name;
+	};
 	$.prefix=function (prio, pre) {
 		prefixOrElement.reg("prefix", prio, pre);
 	};
@@ -80,37 +89,43 @@ const ExpressionParser=function () {
 		$.mkInfix.def=f;
 	};
 	$.mkInfix.def=function (left,op,right,prio) {
-		return Parser.setRange({type:"infix", op:op, left: left, right: right,prio});
+		return Parser.setRange({type:$.prioToNodeTypeName(prio)||"infix",
+		op:op, left: left, right: right,prio});
 	};
 	$.mkInfixl=function (f) {
 		$.mkInfixl.def=f;
 	};
 	$.mkInfixl.def=function (left, op , right,prio) {
-		return Parser.setRange({type:"infixl",op:op ,left:left, right:right,prio});
+		return Parser.setRange({type:$.prioToNodeTypeName(prio)||"infixl",
+		op:op ,left:left, right:right,prio});
 	};
 	$.mkInfixr=function (f) {
 		$.mkInfixr.def=f;
 	};
 	$.mkInfixr.def=function (left, op , right,prio) {
-		return Parser.setRange({type:"infixr",op:op ,left:left, right:right,prio});
+		return Parser.setRange({type:$.prioToNodeTypeName(prio)||"infixr",
+		op:op ,left:left, right:right,prio});
 	};
 	$.mkPrefix=function (f) {
 		$.mkPrefix.def=f;
 	};
 	$.mkPrefix.def=function (op , right,prio) {
-		return Parser.setRange({type:"prefix", op:op, right:right,prio});
+		return Parser.setRange({type:$.prioToNodeTypeName(prio)||"prefix",
+		op:op, right:right,prio});
 	};
 	$.mkPostfix=function (f) {
 		$.mkPostfix.def=f;
 	};
 	$.mkPostfix.def=function (left, op,prio) {
-		return Parser.setRange({type:"postfix", left:left, op:op,prio});
+		return Parser.setRange({type:$.prioToNodeTypeName(prio)||"postfix",
+		left:left, op:op,prio});
 	};
 	$.mkTrifixr=function(f) {
 		$.mkTrifixr.def=f;
 	};
 	$.mkTrifixr.def=function (left, op1, mid, op2, right,prio) {
-		return Parser.setRange({type:"trifixr", left:left, op1:op1, mid:mid, op2:op2, right:right,prio});
+		return Parser.setRange({type:$.prioToNodeTypeName(prio)||"trifixr",
+		left:left, op1:op1, mid:mid, op2:op2, right:right,prio});
 	};
 	$.build= function () {
 		//postfixOrInfix.build();

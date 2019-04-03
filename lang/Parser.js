@@ -465,6 +465,9 @@ Parser.fromFirstTokens=function (tbl) {
 	res.checkTbl();
 	return res;
 };
+class Token {
+}
+Token.prototype.toString=function(){return this.text;};
 
 var StringParser={
 	empty: Parser.create(function(state) {
@@ -505,17 +508,18 @@ var StringParser={
 			if ($.options.traceToken) console.log("pos="+spos+" r="+r1);
 			if(r1) {
 				if ($.options.traceToken) console.log("str:succ");
-				r1.pos=spos;
-				r1.src=state.src; // insert 2013/05/01
+				const token=new Token();
+				token.pos=spos;
+				token.len=r1.len;
+				token.src=state.src; // insert 2013/05/01
 				if (state.src.pos2rc) {
-					var rc=state.src.pos2rc.getRC(r1.pos);
-					r1.row=rc.row;
-					r1.col=rc.col;
+					var rc=state.src.pos2rc.getRC(token.pos);
+					token.row=rc.row;
+					token.col=rc.col;
 				}
-				r1.text=str.substring(r1.pos,r1.pos+r1.len);
-				r1.toString=function () {return this.text; };
+				token.text=str.substring(token.pos,token.pos+token.len);
 				var ns=state.clone();
-				extend(ns, {pos:spos+r1.len, success:true, result:[r1]});
+				extend(ns, {pos:spos+token.len, success:true, result:[token]});
 				state.updateMaxPos(ns.pos);
 				return ns;
 			}else{

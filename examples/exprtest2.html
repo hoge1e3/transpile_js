@@ -1,0 +1,14 @@
+<form name="prog">
+   <textarea name="text" rows=5 cols=40>
+       1+2*3+4*5
+   </textarea>
+</form>
+<button onclick="run()">Run</button>
+<script src="../lib/require.js"></script>
+<script src="reqConf.js"></script>
+<script>
+requirejs.config(window.reqConf);
+requirejs(["examples/exprtest2/myRunner"],function () {
+
+});
+</script>

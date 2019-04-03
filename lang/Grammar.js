@@ -43,29 +43,37 @@ class Grammar {
         e.element(this.toParser(elem));
         var prio=0;
         for (let op of ops ){
-            const type=op.shift();
+            const rtype=op.shift();
             op=op.map(this.toParser.bind(this));
-            switch (type) {
+            let [typeName,opType]=rtype.split(":");
+            if (!opType) { opType=typeName; typeName=null;}
+            switch (opType) {
                 case "prefix":
                 e.prefix(prio,...op);
+                if (typeName) e.prioToNodeType(prio,typeName);
                 break;
                 case "postfix":
                 e.postfix(prio,...op);
+                if (typeName) e.prioToNodeType(prio,typeName);
                 break;
                 case "trifixr":
                 e.trifix(prio,...op);
+                if (typeName) e.prioToNodeType(prio,typeName);
                 break;
                 case "infixl":
                 e.infixl(prio,...op);
+                if (typeName) e.prioToNodeType(prio,typeName);
                 break;
                 case "infixr":
                 e.infixr(prio,...op);
+                if (typeName) e.prioToNodeType(prio,typeName);
                 break;
                 default:
-                throw new Error(type+": invalid operator type");
+                throw new Error(opType+": invalid operator type");
             }
             prio++;
         }
+        console.log(e);
         return e.build();
     }
     get(name) {
