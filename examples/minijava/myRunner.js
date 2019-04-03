@@ -1,9 +1,9 @@
 // MINIJAVA
 define(function(require,exports,module) {
-    const myGrammar=require("./myGrammar");
-    const myCodeGen=require("./myCodeGen");
-    const mySemantics=require("./mySemantics");
-    const VisitorTmpl=require("../../lang/VisitorTmpl");
+    const myGrammar=require("examples/minijava/myGrammar");
+    const myCodeGen=require("examples/minijava/myCodeGen");
+    const mySemantics=require("examples/minijava/mySemantics");
+    const VisitorTmpl=require("lang/VisitorTmpl");
     VisitorTmpl.genVisitor(myGrammar.parser);
 window.run=()=>{
     let src=document.forms.prog.text.value;

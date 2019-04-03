@@ -1,5 +1,5 @@
 define(function (require,exports,module) {
-const Pos2RC=require("./Pos2RC");
+const Pos2RC=require("lang/Pos2RC");
 //import Pos2RC from "./Pos2RC.js";
 function extend(dst, src) {
 	var i;

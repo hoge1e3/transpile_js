@@ -1,8 +1,8 @@
 define(function (require,exports,module) {//----
-const P=require("./Parser");
-const assert=require("../lib/assert");
-const EP=require("./ExpressionParser");
-const NodeTypes=require("./NodeTypes");
+const P=require("lang/Parser");
+const assert=require("lib/assert");
+const EP=require("lang/ExpressionParser");
+const NodeTypes=require("lang/NodeTypes");
 class Grammar {
     constructor(options) {
         options=options||{};

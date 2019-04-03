@@ -1,7 +1,7 @@
 // MINIJAVA
 define(function (require,exports,module) {
-const Visitor=require("../../lang/Visitor");
-const CodeGen=require("../../lang/CodeGen");
+const Visitor=require("lang/Visitor");
+const CodeGen=require("lang/CodeGen");
 
 const vdef={
     program: function (node) {

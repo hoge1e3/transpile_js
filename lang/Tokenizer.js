@@ -1,6 +1,6 @@
 define(function (require,exports,module) {
-    const P=require("./Parser");
-    const Grammar=require("./Grammar");
+    const P=require("lang/Parser");
+    const Grammar=require("lang/Grammar");
     class Tokenizer {
         constructor({order,defs,space}) {
             this.g=new Grammar({space});
