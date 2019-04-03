@@ -1,4 +1,4 @@
-define ([],function () {
+define(function (require,exports,module) {
 class Pos2RC {
     constructor(src,origin) {
         if (origin==null) this.origin=1;// or 0

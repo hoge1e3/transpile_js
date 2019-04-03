@@ -1,6 +1,6 @@
 // MINIJAVA
-define (["lang/Visitor2"],
-function (Visitor) {
+define(function (require,exports,module) {
+const Visitor=require("lang/Visitor2");
 
 class Field {
     constructor(type, name) {

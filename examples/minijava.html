@@ -35,25 +35,10 @@
 </form>
 <button onclick="run()">Run</button>
 <script src="../lib/require.js"></script>
+<script src="reqConf.js"></script>
 <script>
-requirejs.config({
-    paths: {
-        "lib/root": "../lib/root",
-        "lib/assert": "../lib/assert",
-        "lang/CodeGen": "../lang/CodeGen",
-        "lang/Grammar": "../lang/Grammar",
-        "lang/Tokenizer": "../lang/Tokenizer",
-        "lang/ExpressionParser": "../lang/ExpressionParser",
-        "lang/NodeTypes": "../lang/NodeTypes",
-        "lang/Parser": "../lang/Parser",
-        "lang/Pos2RC": "../lang/Pos2RC",
-        "source-map":"../lang/source-map",
-        "lang/Visitor": "../lang/Visitor",
-        "lang/Visitor2": "../lang/Visitor2",
-        "lang/VisitorTmpl": "../lang/VisitorTmpl",
-    }
-});
-requirejs(["minijava/myRunner"],function () {
+requirejs.config(window.reqConf);
+requirejs(["examples/minijava/myRunner"],function () {
 
 });
 </script>

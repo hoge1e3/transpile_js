@@ -1,6 +1,9 @@
-define(["lib/assert","source-map","lang/Pos2RC"],function (A, S, Pos2RC) {
+define(function (require,exports,module) {
 //	console.log(A,S,Pos2RC);
 //S=sourceMap;
+const A=require("lib/assert");
+const S=require("source-map");
+const Pos2RC=require("lang/Pos2RC");
 
 const IndentBuffer=function (options) {
 	options=options||{};

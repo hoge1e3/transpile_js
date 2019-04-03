@@ -1,6 +1,6 @@
 define(function (require, exports, module) {
-    const CodeGen=require("./CodeGen");
-    const T=require("./NodeTypes");
+    const CodeGen=require("lang/CodeGen");
+    const T=require("lang/NodeTypes");
     exports.genVisitor=function (g) {
         const buf=new CodeGen();
         for (var gname in g.defs) {

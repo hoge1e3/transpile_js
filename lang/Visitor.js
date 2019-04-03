@@ -1,4 +1,4 @@
-define([],function () {
+define(function (require,exports,module) {
 const Visitor = function (funcs) {
 	var $={funcs:funcs, path:[]};
 	$.visit=function (node) {

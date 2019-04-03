@@ -1,4 +1,5 @@
-define(["lang/Parser"], function (Parser) {
+define(function (require,exports,module) {
+const Parser=require("lang/Parser");
 // parser.js の補助ライブラリ．式の解析を担当する
 const ExpressionParser=function () {
 	var $={};

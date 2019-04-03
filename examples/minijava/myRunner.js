@@ -1,7 +1,9 @@
 // MINIJAVA
-requirejs(["minijava/myGrammar","minijava/myCodeGen",
-"minijava/mySemantics","lang/VisitorTmpl"],
-function (myGrammar, myCodeGen, mySemantics,VisitorTmpl) {
+define(function(require,exports,module) {
+    const myGrammar=require("examples/minijava/myGrammar");
+    const myCodeGen=require("examples/minijava/myCodeGen");
+    const mySemantics=require("examples/minijava/mySemantics");
+    const VisitorTmpl=require("lang/VisitorTmpl");
     VisitorTmpl.genVisitor(myGrammar.parser);
 window.run=()=>{
     let src=document.forms.prog.text.value;
