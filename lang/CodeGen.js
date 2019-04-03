@@ -2,7 +2,7 @@ define(function (require,exports,module) {
 //	console.log(A,S,Pos2RC);
 //S=sourceMap;
 const A=require("../lib/assert");
-const S=require("./source-map");
+const S=require("source-map");
 const Pos2RC=require("./Pos2RC");
 
 const IndentBuffer=function (options) {
