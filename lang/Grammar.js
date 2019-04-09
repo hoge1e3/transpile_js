@@ -147,6 +147,34 @@ class Grammar {
             });
             p.nodeType=struct;
             return p;
+        } else if (expr) {
+            const tnames=[];
+            for (const k in expr) {
+                tnames.push(k);
+            }
+            if (tnames.length===1) {
+                switch (tnames[0]) {
+                    case "?":
+                    return this.opt(expr["?"]);
+                    case "*":
+                    return this.rep0(expr["*"]);
+                    case "+":
+                    return this.rep1(expr["+"]);
+                    case "|":
+                    return this.or(...expr["|"]);
+                    case "-":
+                    return this.except(...expr["-"]);
+                }
+            } else if (expr.element) {
+                if (expr.operators) {
+                    return this.expr(expr);
+                } else if (expr.separator) {
+                    if (expr["?"] || expr.opt || expr.repeat==0) {
+                        return this.sep0(expr.element, expr.separator);
+                    }
+                    return this.sep1(expr.element, expr.separator);
+                }
+            }
         }
         assert.fail("Invalid expr",expr);
     }

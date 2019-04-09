@@ -12,14 +12,14 @@ define(function (require,module,exports) {
     });
     const g=new Grammar({tokenizer});
     g.def({
-        expr: g.expr({
+        expr: {
             element: "number",
             operators: [
-                ["add:infixl",g.or("+","-")],
-                ["mul:infixl",g.or("*","/")],
+                ["add:infixl",{"|":["+","-"]}],
+                ["mul:infixl",{"|":["*","/"]}],
                 ["neg:prefix","-"]
             ]
-        })
+        }
     });
     return {parser:g, tokenizer:tokenizer};
 });

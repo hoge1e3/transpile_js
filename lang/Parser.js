@@ -163,18 +163,18 @@ extend(Parser.prototype, {// class Parser
 		if (!$.options.optimizeFirst) return this;
 		if (space==null) throw "Space is null2!";
 		if (typeof ct=="string") {
-				var tbl={};
-				for (var i=0; i<ct.length ; i++) {
-					tbl[ct.substring(i,i+1)]=this;
-				}
+			var tbl={};
+			for (var i=0; i<ct.length ; i++) {
+				tbl[ct.substring(i,i+1)]=this;
+			}
 			//this._first={space: space, tbl:tbl};
 			return Parser.fromFirst(space,tbl).setName("(fst "+this.name+")");
-//        		this._first={space: space, chars:ct};
+			//this._first={space: space, chars:ct};
 		} else if (ct==null) {
 			return Parser.fromFirst(space,{ALL:this}).setName("(fst "+this.name+")");
 			//this._first={space:space, tbl:{ALL:this}};
 		} else if (typeof ct=="object") {
-			throw "this._first={space: space, tbl:ct}";
+			throw new Error("this._first={space: space, tbl:ct}");
 		}
 		return this;
 	},
@@ -182,9 +182,9 @@ extend(Parser.prototype, {// class Parser
 		if (!$.options.optimizeFirst) return this;
 		if (typeof tokens=="string") tokens=[tokens];
 		var tbl={};
-			if (tokens) {
-				var t=this;
-				tokens.forEach(function (token) {
+		if (tokens) {
+			var t=this;
+			tokens.forEach(function (token) {
 				tbl[token]=t;
 			});
 		} else {
@@ -236,18 +236,18 @@ extend(Parser.prototype, {// class Parser
 	},
 	or: function(other) { // Parser->Parser
 		nc(other,"other");
-			if (this._first && other._first &&
-					this._first.space && this._first.space===other._first.space) {
+		if (this._first && other._first &&
+			this._first.space && this._first.space===other._first.space) {
 			return this.unifyFirst(other);
-			} else {
-				if ($.options.verboseFirst) {
-					console.log("Cannot unify"+this.name+" || "+other.name+" "+this._first+" - "+other._first);
-				}
-				return this.orNoUnify(other);
+		} else {
+			if ($.options.verboseFirst) {
+				console.log("Cannot unify"+this.name+" || "+other.name+" "+this._first+" - "+other._first);
 			}
+			return this.orNoUnify(other);
+		}
 	},
 	orNoUnify: function (other) {
-			var t=this;  // t:Parser
+		var t=this;  // t:Parser
 		var res=Parser.create(function(s){
 			var r1=t.parse(s); // r1:State
 			if (!r1.success){
