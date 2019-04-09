@@ -133,6 +133,7 @@ const ExpressionParser=function () {
 		$.built= Parser.create(function (st) {
 			return parse(0,st);
 		}).setName("ExpBuilt");
+		$.built._first=prefixOrElement.get()._first;
 		return $.built;
 	};
 	function dump(st, lbl) {

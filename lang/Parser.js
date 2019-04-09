@@ -161,7 +161,7 @@ extend(Parser.prototype, {// class Parser
 */
 	first: function (space, ct) {
 		if (!$.options.optimizeFirst) return this;
-		if (space==null) throw "Space is null2!";
+		//if (space==null) throw "Space is null2!";
 		if (typeof ct=="string") {
 			var tbl={};
 			for (var i=0; i<ct.length ; i++) {
@@ -237,7 +237,7 @@ extend(Parser.prototype, {// class Parser
 	or: function(other) { // Parser->Parser
 		nc(other,"other");
 		if (this._first && other._first &&
-			this._first.space && this._first.space===other._first.space) {
+			/*this._first.space &&*/ this._first.space===other._first.space) {
 			return this.unifyFirst(other);
 		} else {
 			if ($.options.verboseFirst) {
@@ -431,7 +431,7 @@ Parser.fromFirst=function (space, tbl) {
 		return Parser.fromFirstTokens(tbl);
 	}
 	var res=Parser.create(function (s0) {
-		var s=space.parse(s0);
+		var s=(space? space.parse(s0) :s0);
 		var f=s.src.str.substring(s.pos,s.pos+1);
 		if ($.options.traceFirstTbl) {
 			console.log(this.name+": first="+f+" tbl="+( tbl[f]?tbl[f].name:"-") );

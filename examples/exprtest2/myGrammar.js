@@ -1,5 +1,5 @@
 // MINIJAVA
-define(function (require,module,exports) {
+define(function (require,exports,module) {
     const Grammar=require("lang/Grammar");
     const Tokenizer=require("lang/Tokenizer");
     const spc=/^\s*/;
@@ -7,7 +7,10 @@ define(function (require,module,exports) {
         space:spc,
         order: ["+","-","*","/","number"],
         defs: {
-            number: /^(([0-9]+\.[0-9]+)|(\.[0-9]+)|([0-9]+\.)|([0-9]+))/
+            number: {
+                reg:/^(([0-9]+\.[0-9]+)|(\.[0-9]+)|([0-9]+\.)|([0-9]+))/,
+                first: ".-0123456789"
+            }
         }
     });
     const g=new Grammar({tokenizer});
@@ -21,5 +24,6 @@ define(function (require,module,exports) {
             ]
         }
     });
-    return {parser:g, tokenizer:tokenizer};
+    module.exports={parser:g, tokenizer:tokenizer};
+    console.log(module.exports);
 });

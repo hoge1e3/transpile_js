@@ -73,7 +73,7 @@ class Grammar {
             }
             prio++;
         }
-        console.log(e);
+        //console.log(e);
         return e.build();
     }
     get(name) {
@@ -93,16 +93,16 @@ class Grammar {
         return lz;
     }
     toParser(expr) {
-        const tokenify=r=>{
+        const tokenify=(r,ct)=>{
             const r2=(this.space) ? this.space.and(r).ret((s,b)=>b) : r ;
             r2.nodeType=new NodeTypes.Token();
-            return r2;
+            return r2.first(this.space,ct);
         };
         if (expr instanceof P.Parser) return expr;
         if (typeof expr==="string") {
             if (expr.match(/^'/)) {
                 const r=P.StringParser.str(expr.substring(1));
-                return tokenify(r);
+                return tokenify(r,expr[1]);
             }
             return this.get(expr);
         } else if (expr instanceof RegExp) {
@@ -174,6 +174,9 @@ class Grammar {
                     }
                     return this.sep1(expr.element, expr.separator);
                 }
+            } else if (expr.reg) {
+                const r=P.StringParser.reg(expr.reg);
+                return tokenify(r,expr.first);
             }
         }
         assert.fail("Invalid expr",expr);
