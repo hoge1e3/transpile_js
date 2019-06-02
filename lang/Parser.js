@@ -192,11 +192,20 @@ extend(Parser.prototype, {// class Parser
 		}
 		return Parser.fromFirstTokens(tbl).setName("(fstT "+this.name+")");
 	},
-	unifyFirst: function (other) {
+	firstIsSameAs: function (other) {
+		if (!other._first) return this;
+		var tbl={};
+		for (var k in other._first.tbl) {
+			tbl[k]=this;
+		}
+		return Parser.fromFirst(other._first.space, tbl);
+	},
+	unifyFirst: function (other, longer) {
 		var thiz=this;
 		function or(a,b) {
 			if (!a) return b;
 			if (!b) return a;
+			if (longer) return a.lorNoUnify(b).checkTbl();
 			return a.orNoUnify(b).checkTbl();
 		}
 		var tbl={}; // tbl.* includes tbl.ALL
@@ -257,6 +266,33 @@ extend(Parser.prototype, {// class Parser
 				return r1;
 			}
 		});
+		res.name="("+this.name+")>>("+other.name+")";
+		return res;
+	},
+	lor: function(other) { // Parser->Parser
+		nc(other,"other");
+		if (this._first && other._first &&
+			/*this._first.space &&*/ this._first.space===other._first.space) {
+			return this.unifyFirst(other,true);
+		} else {
+			if ($.options.verboseFirst) {
+				console.log("Cannot unify"+this.name+" || "+other.name+" "+this._first+" - "+other._first);
+			}
+			return this.lorNoUnify(other);
+		}
+	},
+	lorNoUnify: function (other) {
+		var t=this;  // t:Parser
+		var res=Parser.create(function(s){
+			var r1=t.parse(s); // r1:State
+			var r2=other.parse(s); // r2:State
+			if (r1.success && !r2.success) return r1;
+			if (!r1.success && r2.success) return r2;
+			if (r2.pos>r1.pos) {
+				return r2;
+			}
+			return r1;
+		});
 		res.name="("+this.name+")|("+other.name+")";
 		return res;
 	},
@@ -303,7 +339,7 @@ extend(Parser.prototype, {// class Parser
 				}
 			}
 		});
-		//if (min>0) res._first=p._first;
+		if (min>0) res=res.firstIsSameAs(p);
 		return res.setName("("+p.name+" * "+min+")");
 	},
 	rep0: function () { return this.repN(0); },

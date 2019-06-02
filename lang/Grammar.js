@@ -208,7 +208,7 @@ for (const m of methods) {
         }
     });
 }
-const chainMethods=["and","or"];
+const chainMethods=["and","or","lor"];
 for (const m of chainMethods) {
     Object.defineProperty(p,m,{
         get: function () {
@@ -216,7 +216,7 @@ for (const m of chainMethods) {
             return (...args)=>{
                 const a=args.map(g.toParser.bind(g));
                 let nodeType;
-                if (m==="or") {
+                if (m==="or" || m==="lor") {
                     nodeType=new NodeTypes.Or();
                     for (const e of a) {
                         if (e.nodeType) nodeType.addCandidate(e.nodeType);

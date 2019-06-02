@@ -20,7 +20,7 @@ define(function (require,exports,module) {
                 }
                 return o;
             });
-            tdef.__token= this.g.or(...seq);
+            tdef.__token= this.g.lor(...seq);
             this.tokenTypes=tokenTypes;
             this.g.def(tdef);
         }

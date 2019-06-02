@@ -5,7 +5,7 @@ define(function (require,exports,module) {
     const spc=/^\s*/;
     const tokenizer=new Tokenizer({
         space:spc,
-        order: ["+","-","*","/","number"],
+        order: ["+","-","*","/","**","number"],
         defs: {
             number: {
                 reg:/^(([0-9]+\.[0-9]+)|(\.[0-9]+)|([0-9]+\.)|([0-9]+))/,
@@ -20,7 +20,8 @@ define(function (require,exports,module) {
             operators: [
                 ["add:infixl",{"|":["+","-"]}],
                 ["mul:infixl",{"|":["*","/"]}],
-                ["neg:prefix","-"]
+                ["neg:prefix","-"],
+                ["pow:infixl","**"]
             ]
         }
     });
